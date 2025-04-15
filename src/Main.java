@@ -1,5 +1,6 @@
 import controller.BookingController;
 import view.MainView;
+import view.AdminDashboardView;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -10,6 +11,7 @@ public class Main {
             Connection conn = DriverManager.getConnection(
                     "jdbc:mysql://localhost:3306/booking_db", "root", ""
             );
+            new AdminDashboardView(conn);
 
             BookingController controller = new BookingController(conn);
             new MainView(controller);
