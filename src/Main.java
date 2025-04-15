@@ -1,18 +1,31 @@
-import controller.BookingController;
+import view.AuthDialog;
 import view.MainView;
+import controller.AuthController;
+import controller.BookingController;
+import util.DBConnection;
 
+import javax.swing.SwingUtilities;
 import java.sql.Connection;
-import java.sql.DriverManager;
 
 public class Main {
     public static void main(String[] args) {
         try {
-            Connection conn = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/booking_db", "root", ""
-            );
+            Connection conn = DBConnection.getConnection();
+            AuthController authController = new AuthController(conn);
 
-            BookingController controller = new BookingController(conn);
-            new MainView(controller);
+            SwingUtilities.invokeLater(() -> {
+                AuthDialog dialog = new AuthDialog(null, authController);
+                dialog.setVisible(true);
+
+                // Si login réussi, on ouvre MainView
+                if (dialog.isSucceeded()) {
+                    BookingController bookingController = new BookingController(conn);
+                    MainView mainView = new MainView(bookingController);
+                    mainView.setVisible(true);
+                } else {
+                    System.exit(0);
+                }
+            });
 
         } catch (Exception e) {
             e.printStackTrace();
