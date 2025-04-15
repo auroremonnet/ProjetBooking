@@ -1,7 +1,6 @@
 package dao;
 
 import model.Administrateur;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -31,5 +30,16 @@ public class AdministrateurDAO {
             }
         }
         return null;
+    }
+
+    public boolean register(Administrateur admin) throws Exception {
+        String sql = "INSERT INTO Administrateur (nom, prenom, email, motDePasse) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, admin.getNom());
+            ps.setString(2, admin.getPrenom());
+            ps.setString(3, admin.getEmail());
+            ps.setString(4, admin.getMotDePasse());
+            return ps.executeUpdate() == 1;
+        }
     }
 }
