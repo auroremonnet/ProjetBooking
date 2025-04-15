@@ -17,17 +17,22 @@ public class BookingController {
         this.reservationDAO = new ReservationDAO(connection);
     }
 
-    // ✅ Méthode utilisée par MainView pour afficher tous les hébergements
+    // ✅ Affiche tous les hébergements
     public List<Hebergement> listerTous() throws Exception {
         return hebergementDAO.getAllHebergements();
     }
 
-    // ✅ Méthode utilisée par MainView pour filtrer la recherche
+    // ✅ Recherche simple : lieu, catégorie, prix max
     public List<Hebergement> chercher(String lieu, String categorie, double prixMax) throws Exception {
         return hebergementDAO.searchHebergements(lieu, categorie, prixMax);
     }
 
-    // (Optionnel pour tests ou autres interfaces)
+    // ✅ Recherche avancée : localisation, catégorie, options
+    public List<Hebergement> rechercherAvancee(String localisation, String categorie, String options) throws Exception {
+        return hebergementDAO.rechercherHebergements(localisation, categorie, options);
+    }
+
+    // ✅ Recherche réservation par ID
     public Reservation getReservationParId(int id) throws Exception {
         return reservationDAO.findById(id);
     }

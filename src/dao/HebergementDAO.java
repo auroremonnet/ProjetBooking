@@ -63,6 +63,40 @@ public class HebergementDAO {
         return resultats;
     }
 
+    // ✅ Recherche avancée par lieu, catégorie, options
+    public List<Hebergement> rechercherHebergements(String localisation, String categorie, String options) throws SQLException {
+        List<Hebergement> results = new ArrayList<>();
+        String sql = "SELECT * FROM Hebergement WHERE 1=1";
+
+        if (!localisation.isEmpty()) sql += " AND localisation LIKE ?";
+        if (!categorie.isEmpty()) sql += " AND categorie LIKE ?";
+        if (!options.isEmpty()) sql += " AND options LIKE ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            int index = 1;
+            if (!localisation.isEmpty()) ps.setString(index++, "%" + localisation + "%");
+            if (!categorie.isEmpty()) ps.setString(index++, "%" + categorie + "%");
+            if (!options.isEmpty()) ps.setString(index++, "%" + options + "%");
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Hebergement h = new Hebergement(
+                        rs.getInt("idHebergement"),
+                        rs.getString("nom"),
+                        rs.getString("adresse"),
+                        rs.getString("localisation"),
+                        rs.getString("description"),
+                        rs.getDouble("prix"),
+                        rs.getString("categorie"),
+                        rs.getString("photos"),
+                        rs.getString("options")
+                );
+                results.add(h);
+            }
+        }
+        return results;
+    }
+
     // ✅ Ajouter un hébergement
     public boolean ajouter(Hebergement h) throws Exception {
         String sql = "INSERT INTO Hebergement (nom, adresse, localisation, description, prix, categorie, photos, options) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
