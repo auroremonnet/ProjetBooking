@@ -1,0 +1,205 @@
+# Si la bibliothèque fpdf n'est pas installée, vous pouvez la décommenter puis l'installer via pip.
+# !pip install fpdf2
+
+from fpdf import FPDF
+
+# Création de la classe PDF
+pdf = FPDF()
+pdf.add_page()
+pdf.set_auto_page_break(auto=True, margin=15)
+pdf.set_font("Arial", size=12)
+
+content = """
+Projet Booking - Étape 1 : Modèle relationnel (avec données pour Administrateur)
+
+1. Analyse des exigences et recensement des besoins
+----------------------------------------------------
+L'application de réservation doit permettre :
+- La recherche et réservation d’hébergements selon plusieurs critères (catégorie, prix, dates, lieu, etc.).
+- L'affichage d’informations détaillées pour chaque hébergement (nom, adresse, description, options telles que wifi, ménage, parking, etc.).
+- La gestion des clients :
+   • Clients classiques (nouveaux et anciens) qui réservent des hébergements.
+   • Administrateurs qui disposent de droits étendus pour la mise à jour des hébergements, l’introduction d’offres de réduction et la maintenance des dossiers clients.
+- La simulation d’un écran de paiement pour le traitement financier.
+
+2. Identification des entités principales
+-------------------------------------------
+a) Client / Utilisateur
+   - Attributs :
+     • idClient (clé primaire)
+     • nom, prenom, email, motDePasse
+     • typeClient (indique "nouveau" ou "ancien")
+     • (autres informations : adresse, téléphone, etc.)
+
+b) Administrateur
+   - Attributs :
+     • idAdministrateur (clé primaire)
+     • nom, prenom, email, motDePasse
+     • (éventuellement d'autres attributs comme le niveau de privilège)
+   - Rôle : Permettre la mise à jour des hébergements, l'introduction d’offres de réduction et la gestion des dossiers clients.
+
+c) Hébergement
+   - Attributs :
+     • idHebergement (clé primaire)
+     • nom, adresse, localisation
+     • description, prix, categorie (hôtel, complexe, appartement, villa, chalet, etc.)
+     • photos (peut nécessiter une table associée pour plusieurs photos)
+     • options disponibles (wifi, ménage, climatisation, parking, petit-déjeuner, etc.)
+
+d) Réservation
+   - Attributs :
+     • idReservation (clé primaire)
+     • dateArrivee, dateDepart, nombreAdultes, nombreEnfants, nombreChambres
+     • idClient (clé étrangère référant à Client)
+     • idHebergement (clé étrangère référant à Hébergement)
+     • (autres informations : date de réservation, statut, etc.)
+
+e) Paiement (pour la simulation du traitement)
+   - Attributs :
+     • idPaiement (clé primaire)
+     • idReservation (clé étrangère référant à Réservation)
+     • montant, modePaiement, datePaiement
+
+f) Avis / Commentaires
+   - Attributs :
+     • idAvis (clé primaire)
+     • idClient (clé étrangère)
+     • idHebergement (clé étrangère)
+     • note (par exemple sur 5), commentaire, dateAvis
+
+3. Définition des relations entre les entités
+---------------------------------------------
+- Client – Réservation :
+  Un client peut effectuer plusieurs réservations.
+  (Relation 1 à N via idClient dans Réservation)
+
+- Hébergement – Réservation :
+  Un hébergement peut être réservé plusieurs fois.
+  (Relation 1 à N via idHebergement dans Réservation)
+
+- Réservation – Paiement :
+  Chaque réservation est associée à au moins un paiement.
+  (Relation 1 à 1 ou 1 à N via idReservation dans Paiement)
+
+- Client – Avis et Hébergement – Avis :
+  Un client peut laisser plusieurs avis et un hébergement peut en recevoir plusieurs.
+  (Relation 1 à N, avec idClient et idHebergement dans Avis)
+
+- Administrateur :
+  L’administrateur interagit avec les autres entités en ayant des droits pour :
+    • Mettre à jour les enregistrements des hébergements.
+    • Introduire ou modifier des offres de réduction.
+    • Gérer les dossiers des clients et, éventuellement, les réservations.
+  (L'administrateur peut être géré séparément ou intégré dans une logique métier distincte.)
+
+4. Choix des types de données pour les attributs
+--------------------------------------------------
+- Identifiants (idClient, idAdministrateur, idHebergement, etc.) :
+  • INT en auto-incrément (ou BIGINT en fonction du volume de données).
+
+- Attributs textuels (nom, description, adresse, commentaire, etc.) :
+  • VARCHAR ou TEXT selon la longueur.
+
+- Dates (dateArrivee, dateDepart, dateAvis, datePaiement, etc.) :
+  • DATE ou DATETIME selon les besoins.
+
+- Attributs numériques (prix, montant, note, nombreAdultes, etc.) :
+  • DECIMAL pour les montants, INT pour les nombres entiers.
+
+- Attributs booléens (pour certaines options) :
+  • BOOLEAN ou TINYINT(1) en MySQL.
+
+5. Exemple de schéma relationnel (diagramme simplifié)
+-------------------------------------------------------
+                     +----------------+
+                     |    Client      |
+                     +----------------+
+                     | idClient (PK)  |
+                     | nom            |
+                     | prenom         |
+                     | email          |
+                     | motDePasse     |
+                     | typeClient     |
+                     +----------------+
+                           |
+                           | 1
+                           |
+                           | N
+                     +--------------------+
+                     |   Réservation      |
+                     +--------------------+
+                     | idReservation (PK) |
+                     | dateArrivee        |
+                     | dateDepart         |
+                     | nombreAdultes      |
+                     | nombreEnfants      |
+                     | nombreChambres     |
+                     | idClient (FK)      |
+                     | idHebergement (FK) |
+                     +--------------------+
+                           |
+                           | N
+                           |
+                           | 1
+                     +---------------------+
+                     |   Hébergement       |
+                     +---------------------+
+                     | idHebergement (PK)  |
+                     | nom                 |
+                     | adresse             |
+                     | description         |
+                     | prix                |
+                     | categorie           |
+                     +---------------------+
+
+                  [Entités supplémentaires]
+                     +----------------------+
+                     |    Administrateur    |
+                     +----------------------+
+                     | idAdministrateur (PK)|
+                     | nom                  |
+                     | prenom               |
+                     | email                |
+                     | motDePasse           |
+                     +----------------------+
+
+                     +---------------------+
+                     |       Paiement      |
+                     +---------------------+
+                     | idPaiement (PK)     |
+                     | idReservation (FK)  |
+                     | montant             |
+                     | modePaiement        |
+                     | datePaiement        |
+                     +---------------------+
+
+                     +----------------------+
+                     |        Avis          |
+                     +----------------------+
+                     | idAvis (PK)          |
+                     | idClient (FK)        |
+                     | idHebergement (FK)   |
+                     | note                 |
+                     | commentaire          |
+                     | dateAvis             |
+                     +----------------------+
+
+6. Documentation et justification
+------------------------------------
+- Le diagramme ci-dessus illustre les relations principales de l’application de réservation.
+- Chaque entité est définie avec des attributs permettant de répondre précisément aux exigences fonctionnelles.
+- La nouvelle entité **Administrateur** est ajoutée pour distinguer les utilisateurs disposant de droits étendus.
+- Les types de données et les clés (primaires et étrangères) sont choisis pour garantir l’intégrité et la cohérence des informations.
+- Ce modèle relationnel servira de base à la création de la base de données MySQL dans la suite du projet.
+
+Ce document fournit une base solide pour la conception de la base de données de l’application Booking et intègre désormais tous les acteurs (clients et administrateurs).
+"""
+
+# Ajout du contenu dans le PDF
+pdf.multi_cell(0, 10, content)
+
+# Génération du fichier PDF avec les modifications intégrées
+output_filename = "/mnt/data/modele_relationnel_etape1.pdf"
+pdf.output(output_filename)
+
+print(f"Le fichier PDF a été généré avec succès ici : {output_filename}")
