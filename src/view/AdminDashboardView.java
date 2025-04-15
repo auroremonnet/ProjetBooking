@@ -10,7 +10,7 @@ import java.util.List;
 
 public class AdminDashboardView extends JFrame {
     private final AdminController controller;
-    private JTextArea output;
+
     private JTextField nomField, adresseField, localisationField, prixField, categorieField, photoField, optionsField, idSuppressionField;
 
     public AdminDashboardView(Connection conn) {
@@ -22,13 +22,65 @@ public class AdminDashboardView extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        output = new JTextArea();
-        output.setEditable(false);
-        output.setFont(new Font("Monospaced", Font.PLAIN, 13));
-        output.setMargin(new Insets(10, 10, 10, 10));
-        add(new JScrollPane(output), BorderLayout.CENTER);
+        chargerHebergements();
+        add(buildFormPanel(), BorderLayout.SOUTH);
 
+        setVisible(true);
+    }
+
+    private void chargerHebergements() {
+        try {
+            List<Hebergement> liste = controller.listerHebergements();
+
+            JPanel contentPanel = new JPanel();
+            contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+            contentPanel.setBackground(Color.WHITE);
+
+            for (Hebergement h : liste) {
+                JPanel ligne = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                ligne.setBackground(Color.WHITE);
+                ligne.setPreferredSize(new Dimension(850, 100));
+
+                // 📷 Image
+                String imagePath = "resources/images/" + h.getPhotos();
+                ImageIcon icon = new ImageIcon(imagePath);
+                Image scaled = icon.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
+                JLabel imageLabel = new JLabel(new ImageIcon(scaled));
+
+                // 🧾 Texte sur une seule ligne
+                String info = String.format(
+                        "<html><b>ID:</b> %d | <b>%s</b> | %s — %.2f €<br>Catégorie: %s | Options: %s</html>",
+                        h.getIdHebergement(), h.getNom(), h.getAdresse(), h.getPrix(),
+                        h.getCategorie(), h.getOptions()
+                );
+
+                JLabel label = new JLabel(info);
+                label.setPreferredSize(new Dimension(700, 80));
+
+                ligne.add(imageLabel);
+                ligne.add(label);
+                contentPanel.add(ligne);
+            }
+
+            JScrollPane scrollPane = new JScrollPane(contentPanel);
+
+            // 🧹 Rafraîchit interface
+            getContentPane().removeAll();
+            add(scrollPane, BorderLayout.CENTER);
+            add(buildFormPanel(), BorderLayout.SOUTH);
+
+            revalidate();
+            repaint();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erreur : " + e.getMessage());
+        }
+    }
+
+    private JPanel buildFormPanel() {
         JPanel formPanel = new JPanel(new GridLayout(5, 4, 5, 5));
+        formPanel.setBackground(new Color(245, 245, 245));
+
         nomField = new JTextField();
         adresseField = new JTextField();
         localisationField = new JTextField();
@@ -48,7 +100,7 @@ public class AdminDashboardView extends JFrame {
         formPanel.add(prixField);
         formPanel.add(new JLabel("Catégorie"));
         formPanel.add(categorieField);
-        formPanel.add(new JLabel("Photo"));
+        formPanel.add(new JLabel("Photo (nom.jpg)"));
         formPanel.add(photoField);
         formPanel.add(new JLabel("Options"));
         formPanel.add(optionsField);
@@ -66,51 +118,8 @@ public class AdminDashboardView extends JFrame {
         formPanel.add(supprimerBtn);
         formPanel.add(refreshBtn);
 
-        add(formPanel, BorderLayout.SOUTH);
-
-        chargerHebergements();
-        setVisible(true);
+        return formPanel;
     }
-
-    private void chargerHebergements() {
-        try {
-            List<Hebergement> liste = controller.listerHebergements();
-
-            JPanel panel = new JPanel();
-            panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-            panel.setBackground(Color.WHITE);
-
-            for (Hebergement h : liste) {
-                JPanel card = new JPanel(new FlowLayout(FlowLayout.LEFT));
-                card.setPreferredSize(new Dimension(850, 100));
-
-                // Texte
-                String info = String.format("<html><b>ID:</b> %d<br><b>%s</b><br>%s — %.2f €<br>Catégorie: %s<br>Options: %s</html>",
-                        h.getIdHebergement(), h.getNom(), h.getAdresse(), h.getPrix(), h.getCategorie(), h.getOptions());
-                JLabel label = new JLabel(info);
-                label.setPreferredSize(new Dimension(500, 80));
-
-                // Image
-                String imagePath = "resources/images/" + h.getPhotos();
-                ImageIcon icon = new ImageIcon(imagePath);
-                Image scaled = icon.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
-                JLabel imageLabel = new JLabel(new ImageIcon(scaled));
-
-                card.add(imageLabel);
-                card.add(label);
-                panel.add(card);
-            }
-
-            JScrollPane scrollPane = new JScrollPane(panel);
-            setContentPane(scrollPane);
-            revalidate();
-            repaint();
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erreur : " + e.getMessage());
-        }
-    }
-
 
     private void ajouterHebergement() {
         try {
@@ -122,7 +131,7 @@ public class AdminDashboardView extends JFrame {
             String photo = photoField.getText();
             String options = optionsField.getText();
 
-            Hebergement h = new Hebergement(nom, adresse, localisation, "Aucune description", prix, categorie, photo, options);
+            Hebergement h = new Hebergement(nom, adresse, localisation, "Description automatique", prix, categorie, photo, options);
             boolean ok = controller.ajouterHebergement(h);
             if (ok) {
                 chargerHebergements();
