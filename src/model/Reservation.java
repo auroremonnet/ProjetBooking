@@ -29,5 +29,14 @@ public class Reservation {
         this.dateReservation = dateReservation;
     }
 
-    // Getters only
+    public int getIdReservation() { return idReservation; }
+    public Date getDateArrivee() { return dateArrivee; }
+    public Date getDateDepart() { return dateDepart; }
+    public int getNombreAdultes() { return nombreAdultes; }
+    public int getNombreEnfants() { return nombreEnfants; }
+    public int getNombreChambres() { return nombreChambres; }
+    public int getIdClient() { return idClient; }
+    public int getIdHebergement() { return idHebergement; }
+    public String getStatut() { return statut; }
+    public Timestamp getDateReservation() { return dateReservation; }
 }
