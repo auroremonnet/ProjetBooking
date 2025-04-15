@@ -1,57 +1,35 @@
-import java.sql.*;
+package dao;
+
+import model.Administrateur;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class AdministrateurDAO {
-    private Connection conn;
+    private final Connection connection;
 
-    public AdministrateurDAO(Connection conn) {
-        this.conn = conn;
+    public AdministrateurDAO(Connection connection) {
+        this.connection = connection;
     }
 
-    // Récupère un administrateur par email et mot de passe (pour la connexion)
-    public Administrateur getAdministrateurByEmailAndPassword(String email, String motDePasse) {
+    public Administrateur login(String email, String motDePasse) throws Exception {
         String sql = "SELECT * FROM Administrateur WHERE email = ? AND motDePasse = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, email);
             ps.setString(2, motDePasse);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return new Administrateur(
-                        rs.getInt("idAdministrateur"),
-                        rs.getString("nom"),
-                        rs.getString("prenom"),
-                        rs.getString("email"),
-                        rs.getString("motDePasse")
-                );
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new Administrateur(
+                            rs.getInt("idAdministrateur"),
+                            rs.getString("nom"),
+                            rs.getString("prenom"),
+                            rs.getString("email"),
+                            rs.getString("motDePasse")
+                    );
+                }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
         return null;
     }
-
-    // Ajoute un nouvel administrateur
-    public boolean addAdministrateur(Administrateur admin) {
-        String sql = "INSERT INTO Administrateur (nom, prenom, email, motDePasse) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, admin.getNom());
-            ps.setString(2, admin.getPrenom());
-            ps.setString(3, admin.getEmail());
-            ps.setString(4, admin.getMotDePasse());
-            int affectedRows = ps.executeUpdate();
-            if (affectedRows == 0) {
-                throw new SQLException("La création de l'administrateur a échoué, aucune ligne affectée.");
-            }
-            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    admin.setIdAdministrateur(generatedKeys.getInt(1));
-                }
-            }
-            return true;
-        } catch(SQLException e){
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    // D'autres méthodes (update, delete, getById, etc.) peuvent être ajoutées selon les besoins
 }

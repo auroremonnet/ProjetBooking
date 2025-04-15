@@ -1,23 +1,34 @@
 package controller;
 
-import dao.ReservationDAO; // Vérifie bien cet import
-// autres imports...
+import dao.HebergementDAO;
+import dao.ReservationDAO;
+import model.Hebergement;
+import model.Reservation;
+
+import java.sql.Connection;
+import java.util.List;
 
 public class BookingController {
-    private ReservationDAO reservationDAO;
+    private final HebergementDAO hebergementDAO;
+    private final ReservationDAO reservationDAO;
 
-    public BookingController(ReservationDAO reservationDAO) {
-        this.reservationDAO = reservationDAO;
+    public BookingController(Connection connection) {
+        this.hebergementDAO = new HebergementDAO(connection);
+        this.reservationDAO = new ReservationDAO(connection);
     }
 
-    // Exemple de méthode utilisant ReservationDAO
-    public void afficherReservation(int id) {
-        try {
-            System.out.println(reservationDAO.findById(id));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    // ✅ Méthode utilisée par MainView pour afficher tous les hébergements
+    public List<Hebergement> listerTous() throws Exception {
+        return hebergementDAO.getAllHebergements();
     }
 
-    // Reste du code du contrôleur...
+    // ✅ Méthode utilisée par MainView pour filtrer la recherche
+    public List<Hebergement> chercher(String lieu, String categorie, double prixMax) throws Exception {
+        return hebergementDAO.searchHebergements(lieu, categorie, prixMax);
+    }
+
+    // (Optionnel pour tests ou autres interfaces)
+    public Reservation getReservationParId(int id) throws Exception {
+        return reservationDAO.findById(id);
+    }
 }

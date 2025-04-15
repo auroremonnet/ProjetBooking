@@ -1,58 +1,51 @@
+package dao;
+
+import model.Avis;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class AvisDAO {
-    private Connection conn;
+    private final Connection connection;
 
-    public AvisDAO(Connection conn) {
-        this.conn = conn;
+    public AvisDAO(Connection connection) {
+        this.connection = connection;
     }
 
-    // Ajoute un nouvel avis
-    public boolean addAvis(Avis avis) {
-        String sql = "INSERT INTO Avis (idClient, idHebergement, note, commentaire) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+    public boolean ajouterAvis(Avis avis) throws Exception {
+        if (avis.getNote() < 1 || avis.getNote() > 5) {
+            throw new IllegalArgumentException("La note doit être entre 1 et 5.");
+        }
+
+        String sql = "INSERT INTO Avis (idClient, idHebergement, note, commentaire, dateAvis) VALUES (?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, avis.getIdClient());
             ps.setInt(2, avis.getIdHebergement());
             ps.setInt(3, avis.getNote());
             ps.setString(4, avis.getCommentaire());
-            int affectedRows = ps.executeUpdate();
-            if (affectedRows == 0) {
-                throw new SQLException("La création de l'avis a échoué, aucune ligne affectée.");
-            }
-            try (ResultSet generatedKeys = ps.getGeneratedKeys()){
-                if (generatedKeys.next()){
-                    avis.setIdAvis(generatedKeys.getInt(1));
-                }
-            }
-            return true;
-        } catch(SQLException e){
-            e.printStackTrace();
+            ps.setTimestamp(5, avis.getDateAvis());
+            return ps.executeUpdate() == 1;
         }
-        return false;
     }
 
-    // Récupère la liste des avis pour un hébergement
-    public List<Avis> getAvisByHebergementId(int idHebergement) {
+    public List<Avis> getAvisPourHebergement(int idHebergement) throws Exception {
         List<Avis> avisList = new ArrayList<>();
         String sql = "SELECT * FROM Avis WHERE idHebergement = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, idHebergement);
-            ResultSet rs = ps.executeQuery();
-            while(rs.next()){
-                Avis avis = new Avis(
-                        rs.getInt("idAvis"),
-                        rs.getInt("idClient"),
-                        rs.getInt("idHebergement"),
-                        rs.getInt("note"),
-                        rs.getString("commentaire"),
-                        rs.getTimestamp("dateAvis").toLocalDateTime()
-                );
-                avisList.add(avis);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    avisList.add(new Avis(
+                            rs.getInt("idAvis"),
+                            rs.getInt("idClient"),
+                            rs.getInt("idHebergement"),
+                            rs.getInt("note"),
+                            rs.getString("commentaire"),
+                            rs.getTimestamp("dateAvis")
+                    ));
+                }
             }
-        } catch(SQLException e){
-            e.printStackTrace();
         }
         return avisList;
     }
