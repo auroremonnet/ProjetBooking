@@ -4,7 +4,7 @@ import dao.HebergementDAO;
 import model.Hebergement;
 
 import java.sql.Connection;
-import java.util.List;
+import java.util.List; //test
 
 public class AdminController {
     private final HebergementDAO hebergementDAO;
