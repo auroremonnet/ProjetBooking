@@ -1,3 +1,6 @@
+package dao;
+
+import model.Paiement; // Assure-toi que la classe Paiement est dans le package model
 import java.sql.*;
 
 public class PaiementDAO {
@@ -36,15 +39,16 @@ public class PaiementDAO {
         String sql = "SELECT * FROM Paiement WHERE idReservation = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, idReservation);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()){
-                return new Paiement(
-                        rs.getInt("idPaiement"),
-                        rs.getInt("idReservation"),
-                        rs.getBigDecimal("montant"),
-                        rs.getString("modePaiement"),
-                        rs.getTimestamp("datePaiement").toLocalDateTime()
-                );
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()){
+                    return new Paiement(
+                            rs.getInt("idPaiement"),
+                            rs.getInt("idReservation"),
+                            rs.getBigDecimal("montant"),
+                            rs.getString("modePaiement"),
+                            rs.getTimestamp("datePaiement").toLocalDateTime()
+                    );
+                }
             }
         } catch(SQLException e){
             e.printStackTrace();
@@ -52,4 +56,3 @@ public class PaiementDAO {
         return null;
     }
 }
-
