@@ -20,6 +20,9 @@ public class MainView extends JFrame {
     private List<JCheckBox> cbProfitances = new ArrayList<>();
 
     private JTextField champLieu = new JTextField();
+    private JSpinner spinnerParents = new JSpinner(new SpinnerNumberModel(2, 0, 20, 1));
+    private JSpinner spinnerEnfants = new JSpinner(new SpinnerNumberModel(0, 0, 20, 1));
+    private JSpinner spinnerLits = new JSpinner(new SpinnerNumberModel(1, 1, 20, 1));
     private JDatePickerImpl dateArriveePicker;
     private JDatePickerImpl dateDepartPicker;
 
@@ -30,18 +33,17 @@ public class MainView extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        // === HEADER ===
+        // === Header ===
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(Color.decode("#7ac2c7"));
-        header.setPreferredSize(new Dimension(1200, 50));
+        header.setPreferredSize(new Dimension(1200, 60));
 
         JLabel titre = new JLabel("Hébergements", SwingConstants.CENTER);
-        titre.setFont(new Font("Arial", Font.BOLD, 20));
+        titre.setFont(new Font("Arial", Font.BOLD, 22));
         header.add(titre, BorderLayout.CENTER);
 
         JButton btnHome = new JButton("Accueil");
         btnHome.setFocusPainted(false);
-        btnHome.setBorderPainted(false);
         btnHome.setContentAreaFilled(false);
         btnHome.setFont(new Font("Arial", Font.PLAIN, 14));
         btnHome.addActionListener(e -> {
@@ -49,14 +51,14 @@ public class MainView extends JFrame {
             new MainView(controller);
         });
         header.add(btnHome, BorderLayout.EAST);
-
         add(header, BorderLayout.NORTH);
 
-        // === Menu filtres à gauche ===
+        // === Menu filtres gauche ===
         filtresPanel = new JPanel();
         filtresPanel.setLayout(new BoxLayout(filtresPanel, BoxLayout.Y_AXIS));
         filtresPanel.setBackground(Color.decode("#437a7e"));
 
+        // Lieu
         JLabel lblLieu = new JLabel("📍 Lieu :");
         lblLieu.setForeground(Color.WHITE);
         lblLieu.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 0));
@@ -64,17 +66,17 @@ public class MainView extends JFrame {
         filtresPanel.add(champLieu);
         filtresPanel.add(Box.createVerticalStrut(10));
 
+        // Catégories et filtres
         addRepliableSection("📂 Catégories :", cbCategories, "Hôtel", "Appartement", "Chalet", "Villa", "Loft");
         addRepliableSection("📍 Localisation :", cbLocalisations, "Mer", "Montagne", "Campagne", "Ville");
         addRepliableSection("⚙️ Caractéristiques :", cbCaracteristiques, "Wifi", "Climatisation", "Coffre-fort", "Fumeur", "Non fumeur", "Ménage", "Petit-déjeuner");
         addRepliableSection("🍃 Profitance :", cbProfitances, "Plage", "Activité pas loin", "Environnement naturel");
 
-        // === Dates ===
+        // Dates
         JLabel lblDates = new JLabel("📅 Dates de séjour :");
         lblDates.setForeground(Color.WHITE);
         lblDates.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 0));
         filtresPanel.add(lblDates);
-
         dateArriveePicker = creerDatePicker();
         dateDepartPicker = creerDatePicker();
         filtresPanel.add(dateArriveePicker);
@@ -82,13 +84,25 @@ public class MainView extends JFrame {
         filtresPanel.add(dateDepartPicker);
         filtresPanel.add(Box.createVerticalStrut(10));
 
+        // Voyageurs
+        JLabel lblVoyageurs = new JLabel("👨‍👩‍👧‍👦 Voyageurs :");
+        lblVoyageurs.setForeground(Color.WHITE);
+        lblVoyageurs.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 0));
+        filtresPanel.add(lblVoyageurs);
+
+        JPanel pVoyageurs = new JPanel(new GridLayout(3, 2, 5, 5));
+        pVoyageurs.setOpaque(false);
+        pVoyageurs.add(new JLabel("Parents :"));
+        pVoyageurs.add(spinnerParents);
+        pVoyageurs.add(new JLabel("Enfants :"));
+        pVoyageurs.add(spinnerEnfants);
+        pVoyageurs.add(new JLabel("Lits :"));
+        pVoyageurs.add(spinnerLits);
+        filtresPanel.add(pVoyageurs);
+
+        // Boutons
         JButton btnChercher = new JButton("🔍 Rechercher");
         JButton btnToutAfficher = new JButton("📋 Tout afficher");
-
-        btnChercher.setAlignmentX(Component.CENTER_ALIGNMENT);
-        btnToutAfficher.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        // Panneau bas
         JPanel panneauBoutons = new JPanel();
         panneauBoutons.setLayout(new BoxLayout(panneauBoutons, BoxLayout.Y_AXIS));
         panneauBoutons.setBackground(Color.decode("#437a7e"));
@@ -97,7 +111,7 @@ public class MainView extends JFrame {
         panneauBoutons.add(Box.createVerticalStrut(10));
         panneauBoutons.add(btnToutAfficher);
 
-        // Scroll vertical sur le panneau bleu
+        // Scroll filtres
         JScrollPane scrollFiltres = new JScrollPane(filtresPanel);
         scrollFiltres.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scrollFiltres.setPreferredSize(new Dimension(290, getHeight()));
@@ -107,20 +121,18 @@ public class MainView extends JFrame {
         blocGauche.setPreferredSize(new Dimension(290, getHeight()));
         blocGauche.add(scrollFiltres, BorderLayout.CENTER);
         blocGauche.add(panneauBoutons, BorderLayout.SOUTH);
-
         add(blocGauche, BorderLayout.WEST);
 
-        // === Zone centrale ===
+        // Zone centrale
         logementPanel = new JPanel();
         logementPanel.setBackground(Color.decode("#f4f4f4"));
         logementPanel.setLayout(new BoxLayout(logementPanel, BoxLayout.Y_AXIS));
-
         JScrollPane scrollPane = new JScrollPane(logementPanel);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         add(scrollPane, BorderLayout.CENTER);
 
-        // === Actions
+        // Actions
         btnChercher.addActionListener(e -> rechercher(controller));
         btnToutAfficher.addActionListener(e -> {
             champLieu.setText("");
@@ -178,14 +190,18 @@ public class MainView extends JFrame {
             selectedOptions.addAll(getListSelected(cbLocalisations));
             String options = String.join(",", selectedOptions);
 
+            int nbVoyageurs = (Integer) spinnerParents.getValue() + (Integer) spinnerEnfants.getValue();
+            int nbLits = (Integer) spinnerLits.getValue();
+
             List<Hebergement> resultats = controller.rechercherAvancee(lieu, categorie, options);
-            if (resultats.isEmpty()) {
-                logementPanel.add(new JLabel("Aucun hébergement trouvé."));
-            } else {
-                for (Hebergement h : resultats) {
+            for (Hebergement h : resultats) {
+                if (h.getCapaciteMax() >= nbVoyageurs && h.getNombreLits() >= nbLits) {
                     logementPanel.add(creerCarteHebergement(h));
                     logementPanel.add(Box.createVerticalStrut(15));
                 }
+            }
+            if (logementPanel.getComponentCount() == 0) {
+                logementPanel.add(new JLabel("Aucun hébergement trouvé."));
             }
         } catch (Exception e) {
             logementPanel.add(new JLabel("Erreur lors de la recherche : " + e.getMessage()));
@@ -248,6 +264,7 @@ public class MainView extends JFrame {
         JLabel adresse = new JLabel(h.getAdresse());
         JLabel prix = new JLabel("Prix : " + h.getPrix() + " €");
         JLabel desc = new JLabel(h.getDescription());
+        JLabel capacite = new JLabel("Capacité : " + h.getCapaciteMax() + " personnes - " + h.getNombreLits() + " lits");
 
         JButton btnReserver = new JButton("Réserver");
         btnReserver.addActionListener(e -> new FicheHebergement(h));
@@ -256,6 +273,7 @@ public class MainView extends JFrame {
         infos.add(adresse);
         infos.add(prix);
         infos.add(desc);
+        infos.add(capacite);
         infos.add(Box.createVerticalStrut(10));
         infos.add(btnReserver);
 

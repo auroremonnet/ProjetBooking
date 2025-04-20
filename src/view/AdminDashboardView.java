@@ -11,13 +11,14 @@ import java.util.List;
 public class AdminDashboardView extends JFrame {
     private final AdminController controller;
 
-    private JTextField nomField, adresseField, localisationField, prixField, categorieField, photoField, optionsField, idSuppressionField;
+    private JTextField nomField, adresseField, localisationField, prixField,
+            categorieField, photoField, optionsField, capaciteField, litsField, idSuppressionField;
 
     public AdminDashboardView(Connection conn) {
         this.controller = new AdminController(conn);
 
         setTitle("🛠️ Admin - Gestion des hébergements");
-        setSize(900, 600);
+        setSize(1000, 650);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -39,7 +40,7 @@ public class AdminDashboardView extends JFrame {
             for (Hebergement h : liste) {
                 JPanel ligne = new JPanel(new FlowLayout(FlowLayout.LEFT));
                 ligne.setBackground(Color.WHITE);
-                ligne.setPreferredSize(new Dimension(850, 100));
+                ligne.setPreferredSize(new Dimension(950, 100));
 
                 // 📷 Image
                 String imagePath = "resources/images/" + h.getPhotos();
@@ -49,13 +50,13 @@ public class AdminDashboardView extends JFrame {
 
                 // 🧾 Texte sur une seule ligne
                 String info = String.format(
-                        "<html><b>ID:</b> %d | <b>%s</b> | %s — %.2f €<br>Catégorie: %s | Options: %s</html>",
+                        "<html><b>ID:</b> %d | <b>%s</b> | %s — %.2f €<br>Catégorie: %s | Options: %s | Capacité: %d | Lits: %d</html>",
                         h.getIdHebergement(), h.getNom(), h.getAdresse(), h.getPrix(),
-                        h.getCategorie(), h.getOptions()
+                        h.getCategorie(), h.getOptions(), h.getCapaciteMax(), h.getNombreLits()
                 );
 
                 JLabel label = new JLabel(info);
-                label.setPreferredSize(new Dimension(700, 80));
+                label.setPreferredSize(new Dimension(800, 80));
 
                 ligne.add(imageLabel);
                 ligne.add(label);
@@ -64,7 +65,6 @@ public class AdminDashboardView extends JFrame {
 
             JScrollPane scrollPane = new JScrollPane(contentPanel);
 
-            // 🧹 Rafraîchit interface
             getContentPane().removeAll();
             add(scrollPane, BorderLayout.CENTER);
             add(buildFormPanel(), BorderLayout.SOUTH);
@@ -78,7 +78,7 @@ public class AdminDashboardView extends JFrame {
     }
 
     private JPanel buildFormPanel() {
-        JPanel formPanel = new JPanel(new GridLayout(5, 4, 5, 5));
+        JPanel formPanel = new JPanel(new GridLayout(6, 4, 5, 5));
         formPanel.setBackground(new Color(245, 245, 245));
 
         nomField = new JTextField();
@@ -88,6 +88,8 @@ public class AdminDashboardView extends JFrame {
         categorieField = new JTextField();
         photoField = new JTextField();
         optionsField = new JTextField();
+        capaciteField = new JTextField();
+        litsField = new JTextField();
         idSuppressionField = new JTextField();
 
         formPanel.add(new JLabel("Nom"));
@@ -104,6 +106,10 @@ public class AdminDashboardView extends JFrame {
         formPanel.add(photoField);
         formPanel.add(new JLabel("Options"));
         formPanel.add(optionsField);
+        formPanel.add(new JLabel("Capacité max"));
+        formPanel.add(capaciteField);
+        formPanel.add(new JLabel("Nombre de lits"));
+        formPanel.add(litsField);
         formPanel.add(new JLabel("ID à supprimer"));
         formPanel.add(idSuppressionField);
 
@@ -130,8 +136,12 @@ public class AdminDashboardView extends JFrame {
             String categorie = categorieField.getText();
             String photo = photoField.getText();
             String options = optionsField.getText();
+            int capaciteMax = Integer.parseInt(capaciteField.getText());
+            int nombreLits = Integer.parseInt(litsField.getText());
 
-            Hebergement h = new Hebergement(nom, adresse, localisation, "Description automatique", prix, categorie, photo, options);
+            Hebergement h = new Hebergement(nom, adresse, localisation, "Description automatique",
+                    prix, categorie, photo, options, capaciteMax, nombreLits);
+
             boolean ok = controller.ajouterHebergement(h);
             if (ok) {
                 chargerHebergements();

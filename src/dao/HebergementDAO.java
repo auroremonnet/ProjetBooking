@@ -29,14 +29,16 @@ public class HebergementDAO {
                         rs.getDouble("prix"),
                         rs.getString("categorie"),
                         rs.getString("photos"),
-                        rs.getString("options")
+                        rs.getString("options"),
+                        rs.getInt("capacite_max"),
+                        rs.getInt("nombre_lits")
                 ));
             }
         }
         return liste;
     }
 
-    // ✅ Recherche filtrée par lieu, catégorie, prix max
+    // ✅ Recherche filtrée
     public List<Hebergement> searchHebergements(String lieu, String categorie, double prixMax) throws Exception {
         List<Hebergement> resultats = new ArrayList<>();
         String sql = "SELECT * FROM Hebergement WHERE localisation LIKE ? AND categorie LIKE ? AND prix <= ?";
@@ -55,7 +57,9 @@ public class HebergementDAO {
                             rs.getDouble("prix"),
                             rs.getString("categorie"),
                             rs.getString("photos"),
-                            rs.getString("options")
+                            rs.getString("options"),
+                            rs.getInt("capacite_max"),
+                            rs.getInt("nombre_lits")
                     ));
                 }
             }
@@ -65,7 +69,7 @@ public class HebergementDAO {
 
     // ✅ Ajouter un hébergement
     public boolean ajouter(Hebergement h) throws Exception {
-        String sql = "INSERT INTO Hebergement (nom, adresse, localisation, description, prix, categorie, photos, options) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Hebergement (nom, adresse, localisation, description, prix, categorie, photos, options, capacite_max, nombre_lits) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, h.getNom());
             ps.setString(2, h.getAdresse());
@@ -75,11 +79,13 @@ public class HebergementDAO {
             ps.setString(6, h.getCategorie());
             ps.setString(7, h.getPhotos());
             ps.setString(8, h.getOptions());
+            ps.setInt(9, h.getCapaciteMax());
+            ps.setInt(10, h.getNombreLits());
             return ps.executeUpdate() == 1;
         }
     }
 
-    // ✅ Supprimer un hébergement
+    // ✅ Supprimer
     public boolean supprimer(int id) throws Exception {
         String sql = "DELETE FROM Hebergement WHERE idHebergement = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -88,9 +94,9 @@ public class HebergementDAO {
         }
     }
 
-    // ✅ Modifier un hébergement
+    // ✅ Modifier
     public boolean mettreAJour(Hebergement h) throws Exception {
-        String sql = "UPDATE Hebergement SET nom = ?, adresse = ?, localisation = ?, description = ?, prix = ?, categorie = ?, photos = ?, options = ? WHERE idHebergement = ?";
+        String sql = "UPDATE Hebergement SET nom = ?, adresse = ?, localisation = ?, description = ?, prix = ?, categorie = ?, photos = ?, options = ?, capacite_max = ?, nombre_lits = ? WHERE idHebergement = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, h.getNom());
             ps.setString(2, h.getAdresse());
@@ -100,11 +106,14 @@ public class HebergementDAO {
             ps.setString(6, h.getCategorie());
             ps.setString(7, h.getPhotos());
             ps.setString(8, h.getOptions());
-            ps.setInt(9, h.getIdHebergement());
+            ps.setInt(9, h.getCapaciteMax());
+            ps.setInt(10, h.getNombreLits());
+            ps.setInt(11, h.getIdHebergement());
             return ps.executeUpdate() == 1;
         }
     }
-    // ✅ Recherche avancée par lieu, catégorie et options combinées
+
+    // ✅ Recherche avancée
     public List<Hebergement> rechercherHebergements(String localisation, String categorie, String options) throws SQLException {
         List<Hebergement> results = new ArrayList<>();
         String sql = "SELECT * FROM Hebergement WHERE 1=1";
@@ -130,7 +139,9 @@ public class HebergementDAO {
                         rs.getDouble("prix"),
                         rs.getString("categorie"),
                         rs.getString("photos"),
-                        rs.getString("options")
+                        rs.getString("options"),
+                        rs.getInt("capacite_max"),
+                        rs.getInt("nombre_lits")
                 );
                 results.add(h);
             }
@@ -138,5 +149,4 @@ public class HebergementDAO {
 
         return results;
     }
-
 }
