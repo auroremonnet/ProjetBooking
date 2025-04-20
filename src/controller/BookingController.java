@@ -25,7 +25,12 @@ public class BookingController {
     // ✅ Méthode utilisée par MainView pour filtrer la recherche
     public List<Hebergement> chercher(String lieu, String categorie, double prixMax) throws Exception {
         return hebergementDAO.searchHebergements(lieu, categorie, prixMax);
+
     }
+    public List<Hebergement> rechercherAvancee(String lieu, String categorie, String options) throws Exception {
+        return hebergementDAO.rechercherHebergements(lieu, categorie, options);
+    }
+
 
     // (Optionnel pour tests ou autres interfaces)
     public Reservation getReservationParId(int id) throws Exception {
