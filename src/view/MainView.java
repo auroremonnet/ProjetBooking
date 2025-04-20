@@ -6,6 +6,7 @@ import org.jdatepicker.impl.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.List;
 
@@ -53,12 +54,11 @@ public class MainView extends JFrame {
         header.add(btnHome, BorderLayout.EAST);
         add(header, BorderLayout.NORTH);
 
-        // === Menu filtres gauche ===
+        // === Filtres gauche ===
         filtresPanel = new JPanel();
         filtresPanel.setLayout(new BoxLayout(filtresPanel, BoxLayout.Y_AXIS));
         filtresPanel.setBackground(Color.decode("#437a7e"));
 
-        // Lieu
         JLabel lblLieu = new JLabel("📍 Lieu :");
         lblLieu.setForeground(Color.WHITE);
         lblLieu.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 0));
@@ -66,7 +66,6 @@ public class MainView extends JFrame {
         filtresPanel.add(champLieu);
         filtresPanel.add(Box.createVerticalStrut(10));
 
-        // Catégories et filtres
         addRepliableSection("📂 Catégories :", cbCategories, "Hôtel", "Appartement", "Chalet", "Villa", "Loft");
         addRepliableSection("📍 Localisation :", cbLocalisations, "Mer", "Montagne", "Campagne", "Ville");
         addRepliableSection("⚙️ Caractéristiques :", cbCaracteristiques, "Wifi", "Climatisation", "Coffre-fort", "Fumeur", "Non fumeur", "Ménage", "Petit-déjeuner");
@@ -267,7 +266,20 @@ public class MainView extends JFrame {
         JLabel capacite = new JLabel("Capacité : " + h.getCapaciteMax() + " personnes - " + h.getNombreLits() + " lits");
 
         JButton btnReserver = new JButton("Réserver");
-        btnReserver.addActionListener(e -> new FicheHebergement(h));
+        btnReserver.addActionListener(e -> {
+            Date dateArrivee = (Date) dateArriveePicker.getModel().getValue();
+            Date dateDepart = (Date) dateDepartPicker.getModel().getValue();
+            if (dateArrivee != null && dateDepart != null) {
+                LocalDate dateA = dateArrivee.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+                LocalDate dateD = dateDepart.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+                int nbParents = (Integer) spinnerParents.getValue();
+                int nbEnfants = (Integer) spinnerEnfants.getValue();
+                int nbLits = (Integer) spinnerLits.getValue();
+                new FicheHebergement(h, dateA, dateD, nbParents, nbEnfants, nbLits);
+            } else {
+                JOptionPane.showMessageDialog(this, "Veuillez sélectionner les dates avant de réserver.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            }
+        });
 
         infos.add(nom);
         infos.add(adresse);
@@ -284,17 +296,13 @@ public class MainView extends JFrame {
     }
 
     private void resetCheckboxes(List<JCheckBox> checkboxes) {
-        for (JCheckBox cb : checkboxes) {
-            cb.setSelected(false);
-        }
+        for (JCheckBox cb : checkboxes) cb.setSelected(false);
     }
 
     private String getSelected(List<JCheckBox> checkboxes) {
         List<String> selected = new ArrayList<>();
         for (JCheckBox cb : checkboxes) {
-            if (cb.isSelected()) {
-                selected.add(cb.getText());
-            }
+            if (cb.isSelected()) selected.add(cb.getText());
         }
         return String.join(",", selected);
     }
@@ -302,9 +310,7 @@ public class MainView extends JFrame {
     private List<String> getListSelected(List<JCheckBox> checkboxes) {
         List<String> selected = new ArrayList<>();
         for (JCheckBox cb : checkboxes) {
-            if (cb.isSelected()) {
-                selected.add(cb.getText());
-            }
+            if (cb.isSelected()) selected.add(cb.getText());
         }
         return selected;
     }
