@@ -60,4 +60,5 @@ public class BookingController {
     public Reservation getReservationParId(int id) throws Exception {
         return reservationDAO.findById(id);
     }
+
 }

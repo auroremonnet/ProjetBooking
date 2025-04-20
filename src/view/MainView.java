@@ -1,8 +1,11 @@
 package view;
 
 import controller.BookingController;
+import model.Client;
 import model.Hebergement;
 import org.jdatepicker.impl.*;
+import java.sql.Connection;
+
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,14 +15,15 @@ import java.util.List;
 
 public class MainView extends JFrame {
 
+    private Client client;
+    private BookingController controller;
+    private Connection connection;
     private JPanel logementPanel;
     private JPanel filtresPanel;
-
     private List<JCheckBox> cbCategories = new ArrayList<>();
     private List<JCheckBox> cbLocalisations = new ArrayList<>();
     private List<JCheckBox> cbCaracteristiques = new ArrayList<>();
     private List<JCheckBox> cbProfitances = new ArrayList<>();
-
     private JTextField champLieu = new JTextField();
     private JSpinner spinnerParents = new JSpinner(new SpinnerNumberModel(2, 0, 20, 1));
     private JSpinner spinnerEnfants = new JSpinner(new SpinnerNumberModel(0, 0, 20, 1));
@@ -27,14 +31,16 @@ public class MainView extends JFrame {
     private JDatePickerImpl dateArriveePicker;
     private JDatePickerImpl dateDepartPicker;
 
-    public MainView(BookingController controller) {
+    public MainView(BookingController controller, Client client, Connection connection) {
+        this.client = client;
+        this.controller = controller;
+        this.connection = connection;
         setTitle("Booking 2025 – Hébergements");
         setSize(1200, 700);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        // === Header ===
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(Color.decode("#7ac2c7"));
         header.setPreferredSize(new Dimension(1200, 60));
@@ -43,16 +49,32 @@ public class MainView extends JFrame {
         titre.setFont(new Font("Arial", Font.BOLD, 22));
         header.add(titre, BorderLayout.CENTER);
 
-        JButton btnHome = new JButton("Accueil");
-        btnHome.setFocusPainted(false);
-        btnHome.setContentAreaFilled(false);
-        btnHome.setFont(new Font("Arial", Font.PLAIN, 14));
-        btnHome.addActionListener(e -> {
+        // === MENU DÉROULANT ===
+        JPopupMenu menu = new JPopupMenu();
+        JMenuItem itemAccueil = new JMenuItem("🏠 Accueil");
+        JMenuItem itemMonCompte = new JMenuItem("👤 Mon compte");
+
+        itemAccueil.addActionListener(e -> {
             dispose();
-            new MainView(controller);
+            new MainView(controller, client, connection);
         });
-        header.add(btnHome, BorderLayout.EAST);
+
+        itemMonCompte.addActionListener(e -> new MonCompteView(client));
+
+        menu.add(itemAccueil);
+        menu.add(itemMonCompte);
+
+        JButton menuButton = new JButton("☰ Menu");
+        menuButton.setFocusPainted(false);
+        menuButton.setContentAreaFilled(false);
+        menuButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        menuButton.addActionListener(e -> menu.show(menuButton, 0, menuButton.getHeight()));
+
+        header.add(menuButton, BorderLayout.EAST);
         add(header, BorderLayout.NORTH);
+
+        // ... Le reste du code de la classe reste inchangé ...
+
 
         // === Filtres gauche ===
         filtresPanel = new JPanel();
@@ -68,7 +90,7 @@ public class MainView extends JFrame {
 
         addRepliableSection("📂 Catégories :", cbCategories, "Hôtel", "Appartement", "Chalet", "Villa", "Loft");
         addRepliableSection("📍 Localisation :", cbLocalisations, "Mer", "Montagne", "Campagne", "Ville");
-        addRepliableSection("⚙️ Caractéristiques :", cbCaracteristiques, "Wifi", "Climatisation", "Coffre-fort", "Fumeur", "Non fumeur", "Ménage", "Petit-déjeuner");
+        addRepliableSection("⚙ Caractéristiques :", cbCaracteristiques, "Wifi", "Climatisation", "Coffre-fort", "Fumeur", "Non fumeur", "Ménage", "Petit-déjeuner");
         addRepliableSection("🍃 Profitance :", cbProfitances, "Plage", "Activité pas loin", "Environnement naturel");
 
         // Dates
@@ -275,7 +297,10 @@ public class MainView extends JFrame {
                 int nbParents = (Integer) spinnerParents.getValue();
                 int nbEnfants = (Integer) spinnerEnfants.getValue();
                 int nbLits = (Integer) spinnerLits.getValue();
-                new FicheHebergement(h, dateA, dateD, nbParents, nbEnfants, nbLits);
+                new FicheHebergement(connection, h, client, dateA, dateD, nbParents, nbEnfants, nbLits);
+
+
+
             } else {
                 JOptionPane.showMessageDialog(this, "Veuillez sélectionner les dates avant de réserver.", "Erreur", JOptionPane.ERROR_MESSAGE);
             }

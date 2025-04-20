@@ -13,6 +13,8 @@ public class AuthView extends JFrame {
     private AuthController authController;
     private final Connection connection;
 
+    private Client clientConnecte; // Client connecté
+
     // Composants UI
     private JTextField loginEmailField, regNameField, regSurnameField, regEmailField, regAddressField, regPhoneField, regAdminKeyField;
     private JPasswordField loginPasswordField, regPasswordField;
@@ -162,12 +164,13 @@ public class AuthView extends JFrame {
         String password = new String(loginPasswordField.getPassword());
         try {
             if (rbClientLogin.isSelected()) {
-                Client client = authController.loginClient(email, password);
-                if (client != null) {
+                clientConnecte = authController.loginClient(email, password);
+                if (clientConnecte != null) {
                     JOptionPane.showMessageDialog(this, "Connexion réussie !");
                     dispose();
                     BookingController controller = new BookingController(connection);
-                    new MainView(controller);
+                    new MainView(controller, clientConnecte, connection);
+
                 } else {
                     JOptionPane.showMessageDialog(this, "Identifiants incorrects pour client.");
                 }
@@ -207,5 +210,9 @@ public class AuthView extends JFrame {
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Erreur : " + e.getMessage());
         }
+    }
+
+    public Client getClientConnecte() {
+        return clientConnecte;
     }
 }
