@@ -1,8 +1,9 @@
 package dao;
 
 import model.Client;
-
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class ClientDAO {
     private final Connection connection;
@@ -41,7 +42,7 @@ public class ClientDAO {
             ps.setString(2, client.getPrenom());
             ps.setString(3, client.getEmail());
             ps.setString(4, client.getMotDePasse());
-            ps.setString(5, client.getTypeClient());
+            ps.setString(5, client.getTypeClient());  // Par exemple "nouveau"
             ps.setString(6, client.getAdresse());
             ps.setString(7, client.getTelephone());
             return ps.executeUpdate() == 1;
