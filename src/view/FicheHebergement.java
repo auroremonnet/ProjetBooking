@@ -1,5 +1,6 @@
 package view;
 
+import controller.BookingController;
 import controller.ReservationController;
 import model.Client;
 import model.Hebergement;
@@ -20,6 +21,7 @@ import java.util.Comparator;
 public class FicheHebergement extends JFrame {
 
     private final Connection connection;
+    private final BookingController controller;
     private final Client client;
     private final Hebergement hebergement;
     private final LocalDate dateArrivee;
@@ -35,15 +37,17 @@ public class FicheHebergement extends JFrame {
                             LocalDate dateDepart,
                             int nbParents,
                             int nbEnfants,
-                            int nbLits) {
-        this.connection    = connection;
-        this.client        = client;
-        this.hebergement   = h;
-        this.dateArrivee   = dateArrivee;
-        this.dateDepart    = dateDepart;
-        this.nbParents     = nbParents;
-        this.nbEnfants     = nbEnfants;
-        this.nbLits        = nbLits;
+                            int nbLits,
+                            BookingController controller) {
+        this.connection = connection;
+        this.client = client;
+        this.hebergement = h;
+        this.dateArrivee = dateArrivee;
+        this.dateDepart = dateDepart;
+        this.nbParents = nbParents;
+        this.nbEnfants = nbEnfants;
+        this.nbLits = nbLits;
+        this.controller = controller;
 
         setTitle("🛏️ Réservation – " + h.getNom());
         setSize(800, 600);
@@ -66,20 +70,32 @@ public class FicheHebergement extends JFrame {
         titre.setFont(new Font("Arial", Font.BOLD, 22));
         header.add(titre, BorderLayout.CENTER);
 
-        JButton btnAccueil = new JButton("Accueil");
-        btnAccueil.setFocusPainted(false);
-        btnAccueil.setContentAreaFilled(false);
-        btnAccueil.setFont(new Font("Arial", Font.PLAIN, 14));
-        btnAccueil.addActionListener(e -> dispose());
-        header.add(btnAccueil, BorderLayout.EAST);
+        // Menu déroulant
+        JPopupMenu menu = new JPopupMenu();
+        JMenuItem itemAccueil = new JMenuItem("🏠 Accueil");
+        JMenuItem itemMonCompte = new JMenuItem("👤 Mon compte");
 
+        itemAccueil.addActionListener(e -> {
+            dispose();
+            new MainView(controller, client, connection);
+        });
+
+        itemMonCompte.addActionListener(e -> new MonCompteView(client));
+
+        JButton btnMenu = new JButton("☰ Menu");
+        btnMenu.setFocusPainted(false);
+        btnMenu.setContentAreaFilled(false);
+        btnMenu.setFont(new Font("Arial", Font.PLAIN, 14));
+        btnMenu.addActionListener(e -> menu.show(btnMenu, 0, btnMenu.getHeight()));
+
+        header.add(btnMenu, BorderLayout.EAST);
         add(header, BorderLayout.NORTH);
     }
 
     private void buildContent() {
         JPanel center = new JPanel();
         center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
-        center.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        center.setBorder(BorderFactory.createEmptyBorder(20, 80, 20, 80));
         center.setBackground(Color.WHITE);
 
         // --- Image ---
@@ -103,41 +119,41 @@ public class FicheHebergement extends JFrame {
         center.add(nom);
         center.add(Box.createVerticalStrut(10));
 
-        // --- Informations hébergement ---
+        // --- Infos hébergement ---
         JPanel infosPanel = createRoundedPanel();
         infosPanel.add(new JLabel("📍 Adresse : " + hebergement.getAdresse()));
         infosPanel.add(new JLabel("💶 Prix par nuit : " + hebergement.getPrix() + " €"));
-        infosPanel.add(new JLabel("🏠 Capacité : " + hebergement.getCapaciteMax() +
-                " pers – " + hebergement.getNombreLits() + " lits"));
+        infosPanel.add(new JLabel("🏠 Capacité : " + hebergement.getCapaciteMax() + " pers – " + hebergement.getNombreLits() + " lits"));
         center.add(infosPanel);
         center.add(Box.createVerticalStrut(20));
 
-        // --- Détails de la réservation ---
+        // --- Détails sélection utilisateur ---
         JPanel recap = createRoundedPanel();
         recap.setMaximumSize(new Dimension(500, 120));
         recap.add(new JLabel("📋 Vos données sélectionnées"));
         recap.add(new JLabel("🗓️ Séjour : " + dateArrivee + " → " + dateDepart));
-        recap.add(new JLabel("👨‍👩‍👧‍👦 Voyageurs : " +
-                (nbParents + nbEnfants) + " pers (" +
-                nbParents + " parents, " + nbEnfants + " enfants)"));
+        recap.add(new JLabel("👨‍👩‍👧‍👦 Voyageurs : " + (nbParents + nbEnfants) + " pers (" + nbParents + " parents, " + nbEnfants + " enfants)"));
         recap.add(new JLabel("↪️ Lits souhaités : " + nbLits));
         center.add(recap);
         center.add(Box.createVerticalStrut(20));
 
-        // --- Calcul prix total ---
+        // --- Prix total ---
         long nbJours = ChronoUnit.DAYS.between(dateArrivee, dateDepart);
         double total = nbJours * hebergement.getPrix();
         JPanel paiementPanel = createRoundedPanel();
         paiementPanel.setMaximumSize(new Dimension(500, 80));
         paiementPanel.add(new JLabel("💵 Prix total pour " + nbJours + " nuit(s) : " + total + " €"));
         center.add(paiementPanel);
-        center.add(Box.createVerticalStrut(20));
+        center.add(Box.createVerticalStrut(30));
 
-        // --- Bouton de confirmation ---
+        // --- Bouton Payer ---
         JButton btnValider = new JButton("Payer et confirmer");
-        btnValider.setBackground(Color.decode("#e3e3e3"));
+        btnValider.setBackground(Color.decode("#598d90"));
+        btnValider.setForeground(Color.WHITE);
+        btnValider.setFont(new Font("Arial", Font.BOLD, 16));
         btnValider.setFocusPainted(false);
         btnValider.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btnValider.setPreferredSize(new Dimension(250, 50));
         btnValider.addActionListener(e -> doReservationAndPayment(total));
         center.add(btnValider);
 
@@ -146,7 +162,6 @@ public class FicheHebergement extends JFrame {
 
     private void doReservationAndPayment(double montant) {
         try {
-            // 1) créer la réservation en base
             ReservationController rc = new ReservationController(connection);
             Reservation r = new Reservation(
                     0,
@@ -160,27 +175,21 @@ public class FicheHebergement extends JFrame {
                     "Confirmée",
                     new Timestamp(System.currentTimeMillis())
             );
+
             boolean ok = rc.reserver(r);
             if (!ok) {
                 JOptionPane.showMessageDialog(this, "❌ Échec de la réservation.", "Erreur", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            // 2) récupérer l'ID de la réservation créée
             int idResa = rc.historiqueParClient(client.getIdClient())
                     .stream()
                     .max(Comparator.comparing(Reservation::getDateReservation))
                     .get()
                     .getIdReservation();
 
-            // 3) lancer la vue de paiement
             dispose();
-            new PaiementView(
-                    connection,
-                    client.getIdClient(),  // ← ici on passe l’ID du client
-                    idResa,                // l’ID de la réservation qu’on vient de créer
-                    montant                // le montant calculé
-            );
+            new PaiementView(connection, controller, client, idResa, montant);
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -193,7 +202,7 @@ public class FicheHebergement extends JFrame {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                Graphics2D g2 = (Graphics2D)g;
+                Graphics2D g2 = (Graphics2D) g;
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(Color.decode("#7ac2c7"));
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);

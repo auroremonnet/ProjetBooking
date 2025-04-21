@@ -293,7 +293,7 @@ public class MainView extends JFrame {
                 int np = (Integer) spinnerParents.getValue();
                 int ne = (Integer) spinnerEnfants.getValue();
                 int nl = (Integer) spinnerLits.getValue();
-                new FicheHebergement(connection, h, client, a, b, np, ne, nl);
+                new FicheHebergement(connection, h, client, a, b, np, ne, nl, controller);
             } else {
                 JOptionPane.showMessageDialog(this, "Veuillez sélectionner les dates.", "Erreur", JOptionPane.ERROR_MESSAGE);
             }
