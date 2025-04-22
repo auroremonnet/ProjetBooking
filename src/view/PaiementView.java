@@ -42,6 +42,7 @@ public class PaiementView extends JFrame {
         buildContent();
 
         setVisible(true);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
 
     private void buildHeader() {
@@ -62,7 +63,7 @@ public class PaiementView extends JFrame {
             new MainView(controller, client, conn);
         });
 
-        itemMonCompte.addActionListener(e -> new MonCompteView(client));
+        itemMonCompte.addActionListener(e -> new MonCompteView(client, conn));
 
         menu.add(itemAccueil);
         menu.add(itemMonCompte);

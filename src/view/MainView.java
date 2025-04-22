@@ -66,7 +66,7 @@ public class MainView extends JFrame {
             dispose();
             new MainView(controller, client, connection);
         });
-        itemMonCompte.addActionListener(e -> new MonCompteView(client));
+        itemMonCompte.addActionListener(e -> new MonCompteView(client, connection));
         menu.add(itemAccueil);
         menu.add(itemMonCompte);
 
@@ -127,12 +127,22 @@ public class MainView extends JFrame {
         // boutons
         JButton btnChercher     = new JButton("🔍 Rechercher");
         JButton btnToutAfficher = new JButton("📋 Tout afficher");
+        btnChercher.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btnToutAfficher.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btnChercher.setBackground(Color.decode("#920f23"));
+        btnChercher.setForeground(Color.WHITE);
+        btnToutAfficher.setBackground(Color.decode("#920f23"));
+        btnToutAfficher.setForeground(Color.WHITE);
+
         JPanel pnlBtns = new JPanel();
         pnlBtns.setLayout(new BoxLayout(pnlBtns, BoxLayout.Y_AXIS));
         pnlBtns.setBackground(Color.decode("#437a7e"));
+        pnlBtns.add(Box.createVerticalStrut(15));
         pnlBtns.add(btnChercher);
         pnlBtns.add(Box.createVerticalStrut(10));
         pnlBtns.add(btnToutAfficher);
+        pnlBtns.add(Box.createVerticalStrut(15));
+
 
         // scroll filtres
         JScrollPane scFiltres = new JScrollPane(filtresPanel);
@@ -170,6 +180,7 @@ public class MainView extends JFrame {
         // affichage initial
         afficherTous();
         setVisible(true);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
 
     private void addRepliableSection(String titre, List<JCheckBox> liste, String... labels) {
@@ -284,6 +295,11 @@ public class MainView extends JFrame {
         infos.add(new JLabel(h.getDescription()));
         infos.add(new JLabel("Capacité : " + h.getCapaciteMax() + " pers – " + h.getNombreLits() + " lits"));
         JButton btnRes = new JButton("Réserver");
+        btnRes.setBackground(Color.decode("#920f23"));
+        btnRes.setForeground(Color.WHITE);
+        btnRes.setFocusPainted(false);
+        btnRes.setBorderPainted(false);
+
         btnRes.addActionListener(e -> {
             Date d1 = (Date) dateArriveePicker.getModel().getValue();
             Date d2 = (Date) dateDepartPicker.getModel().getValue();

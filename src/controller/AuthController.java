@@ -24,10 +24,13 @@ public class AuthController {
     }
 
     public Administrateur loginAdmin(String email, String motDePasse) throws Exception {
-        return adminDAO.login(email, motDePasse);
+        Administrateur admin = adminDAO.login(email, motDePasse);
+        if (admin != null) {
+            System.out.println("Connexion admin r\u00e9ussie : " + admin.getNom() + " (" + admin.getPhoto() + ")");
+        }
+        return admin;
     }
 
-    // Méthode à appeler lors de l'inscription d'un admin
     public boolean registerAdmin(Administrateur admin) throws Exception {
         return adminDAO.register(admin);
     }

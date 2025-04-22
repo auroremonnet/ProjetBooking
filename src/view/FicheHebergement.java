@@ -59,6 +59,7 @@ public class FicheHebergement extends JFrame {
         buildContent();
 
         setVisible(true);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
 
     private void buildHeader() {
@@ -80,7 +81,7 @@ public class FicheHebergement extends JFrame {
             new MainView(controller, client, connection);
         });
 
-        itemMonCompte.addActionListener(e -> new MonCompteView(client));
+        itemMonCompte.addActionListener(e -> new MonCompteView(client, connection));
 
         JButton btnMenu = new JButton("☰ Menu");
         btnMenu.setFocusPainted(false);

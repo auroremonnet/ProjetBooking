@@ -32,6 +32,7 @@ public class AuthView extends JFrame {
         setLayout(new BorderLayout());
         initUI();
         setVisible(true);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
 
     private void initUI() {
@@ -175,7 +176,14 @@ public class AuthView extends JFrame {
                     JOptionPane.showMessageDialog(this, "Identifiants incorrects pour client.");
                 }
             } else {
-                JOptionPane.showMessageDialog(this, "Connexion admin non implémentée.");
+                Administrateur admin = authController.loginAdmin(email, password);
+                if (admin != null) {
+                    JOptionPane.showMessageDialog(this, "Connexion administrateur réussie !");
+                    dispose();
+                    new AccueilAdminView(admin, connection);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Identifiants incorrects pour administrateur.");
+                }
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Erreur : " + e.getMessage());

@@ -6,6 +6,7 @@ public class Administrateur {
     private String prenom;
     private String email;
     private String motDePasse;
+    private String photo;
 
     public Administrateur(int idAdministrateur, String nom, String prenom, String email, String motDePasse) {
         this.idAdministrateur = idAdministrateur;
@@ -13,6 +14,8 @@ public class Administrateur {
         this.prenom = prenom;
         this.email = email;
         this.motDePasse = motDePasse;
+        this.photo = photo;
+
     }
 
     public Administrateur(String nom, String prenom, String email, String motDePasse) {
@@ -24,4 +27,6 @@ public class Administrateur {
     public String getPrenom() { return prenom; }
     public String getEmail() { return email; }
     public String getMotDePasse() { return motDePasse; }
+    public String getPhoto() { return photo;
+    }
 }

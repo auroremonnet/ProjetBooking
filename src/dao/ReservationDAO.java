@@ -13,6 +13,7 @@ public class ReservationDAO {
         this.connection = connection;
     }
 
+
     public boolean createReservation(Reservation r) throws Exception {
         String sql = "INSERT INTO Reservation (dateArrivee, dateDepart, nombreAdultes, nombreEnfants, nombreChambres, idClient, idHebergement, statut) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -62,6 +63,33 @@ public class ReservationDAO {
         }
     }
 
+    public List<Reservation> getReservationsDerniers3Mois(int idClient) throws Exception {
+        List<Reservation> liste = new ArrayList<>();
+        String sql = "SELECT DISTINCT * FROM Reservation WHERE idClient = ? AND dateReservation >= NOW() - INTERVAL 3 MONTH";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, idClient);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    liste.add(new Reservation(
+                            rs.getInt("idReservation"),
+                            rs.getDate("dateArrivee"),
+                            rs.getDate("dateDepart"),
+                            rs.getInt("nombreAdultes"),
+                            rs.getInt("nombreEnfants"),
+                            rs.getInt("nombreChambres"),
+                            rs.getInt("idClient"),
+                            rs.getInt("idHebergement"),
+                            rs.getString("statut"),
+                            rs.getTimestamp("dateReservation")
+                    ));
+                }
+            }
+        }
+        return liste;
+    }
+
+
+
     public Reservation findById(int idReservation) throws Exception {
         String sql = "SELECT * FROM Reservation WHERE idReservation = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -85,4 +113,5 @@ public class ReservationDAO {
         }
         return null;
     }
+
 }
