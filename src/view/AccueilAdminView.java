@@ -109,8 +109,8 @@ public class AccueilAdminView extends JFrame {
         JButton logoutBtn = createRoundedButton("🔒 Déconnexion",
                 e -> {
                     dispose(); new AuthView(new AuthController(connection), connection);
-                });
-        JButton btnMail = createRoundedButton("✉ Envoyer un mail",
+        });
+        JButton btnMail = createRoundedButton("✉️ Envoyer un mail",
                 e -> new AdminGererMailView(connection));
         panel.add(btnMail);
         panel.add(Box.createVerticalStrut(15));

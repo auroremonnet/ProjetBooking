@@ -64,12 +64,15 @@ public class FicheHebergement extends JFrame {
 
     private void buildHeader() {
         JPanel header = new JPanel(new BorderLayout());
-        header.setBackground(Color.decode("#7ac2c7"));
-        header.setPreferredSize(new Dimension(800, 60));
+        header.setBackground(new Color(122, 194, 199));
+        header.setPreferredSize(new Dimension(900, 70));
 
-        JLabel titre = new JLabel("Réservation", SwingConstants.CENTER);
-        titre.setFont(new Font("Arial", Font.BOLD, 22));
+
+        JLabel titre = new JLabel("Votre Réservation", SwingConstants.CENTER);
+        titre.setFont(new Font("Arial", Font.BOLD, 34));
+        titre.setForeground(Color.WHITE);
         header.add(titre, BorderLayout.CENTER);
+        add(header, BorderLayout.NORTH);
 
         // Menu déroulant
         JPopupMenu menu = new JPopupMenu();
@@ -83,12 +86,14 @@ public class FicheHebergement extends JFrame {
 
         itemMonCompte.addActionListener(e -> new MonCompteView(client, connection, controller));
 
+        menu.add(itemAccueil);
+        menu.add(itemMonCompte);
+
         JButton btnMenu = new JButton("☰ Menu");
         btnMenu.setFocusPainted(false);
         btnMenu.setContentAreaFilled(false);
         btnMenu.setFont(new Font("Arial", Font.PLAIN, 14));
         btnMenu.addActionListener(e -> menu.show(btnMenu, 0, btnMenu.getHeight()));
-
         header.add(btnMenu, BorderLayout.EAST);
         add(header, BorderLayout.NORTH);
     }
@@ -157,6 +162,23 @@ public class FicheHebergement extends JFrame {
         btnValider.setPreferredSize(new Dimension(250, 50));
         btnValider.addActionListener(e -> doReservationAndPayment(total));
         center.add(btnValider);
+        center.add(Box.createVerticalStrut(15)); // espace entre les deux boutons
+
+        JButton btnRetour = new JButton("Retour");
+        btnRetour.setBackground(Color.decode("#7ac2c7"));
+        btnRetour.setForeground(Color.BLACK);
+        btnRetour.setFont(new Font("Arial", Font.PLAIN, 16));
+        btnRetour.setFocusPainted(false);
+        btnRetour.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btnRetour.setPreferredSize(new Dimension(150, 40));
+
+        btnRetour.addActionListener(e -> {
+            dispose(); // ferme la fenêtre actuelle
+            new MainView(controller, client, connection); // retourne à la page d'accueil
+        });
+
+        center.add(btnRetour);
+
 
         add(center, BorderLayout.CENTER);
     }
@@ -190,7 +212,19 @@ public class FicheHebergement extends JFrame {
                     .getIdReservation();
 
             dispose();
-            new PaiementView(connection, controller, client, idResa, montant);
+            new PaiementView(
+                    connection,
+                    controller,
+                    client,
+                    idResa,
+                    montant,
+                    hebergement,
+                    dateArrivee,
+                    dateDepart,
+                    nbParents,
+                    nbEnfants,
+                    nbLits
+            );
 
         } catch (Exception ex) {
             ex.printStackTrace();

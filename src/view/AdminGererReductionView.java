@@ -1,4 +1,4 @@
 package view;
 
-public class AdminGererReductionView{
-        }
+public class AdminGererReductionView {
+}

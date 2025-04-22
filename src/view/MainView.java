@@ -52,11 +52,14 @@ public class MainView extends JFrame {
 
         // === HEADER ===
         JPanel header = new JPanel(new BorderLayout());
-        header.setBackground(Color.decode("#7ac2c7"));
-        header.setPreferredSize(new Dimension(1200, 60));
-        JLabel titre = new JLabel("Hébergements", SwingConstants.CENTER);
-        titre.setFont(new Font("Arial", Font.BOLD, 22));
+        header.setBackground(new Color(122, 194, 199));
+        header.setPreferredSize(new Dimension(900, 70));
+
+        JLabel titre = new JLabel("Recherche Hébergements", SwingConstants.CENTER);
+        titre.setFont(new Font("Arial", Font.BOLD, 34));
+        titre.setForeground(Color.WHITE);
         header.add(titre, BorderLayout.CENTER);
+        add(header, BorderLayout.NORTH);
 
         // menu déroulant
         JPopupMenu menu = new JPopupMenu();
@@ -76,7 +79,6 @@ public class MainView extends JFrame {
         menuButton.setFont(new Font("Arial", Font.PLAIN, 14));
         menuButton.addActionListener(e -> menu.show(menuButton, 0, menuButton.getHeight()));
         header.add(menuButton, BorderLayout.EAST);
-
         add(header, BorderLayout.NORTH);
 
         // date pickers

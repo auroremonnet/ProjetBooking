@@ -99,7 +99,7 @@ public class AdminGererProprieteView extends JFrame {
             scrollPane = new JScrollPane(contentPanel);
             scrollPane.setBorder(BorderFactory.createEmptyBorder());
 
-            // Supprime uniquement le CENTER
+             // Supprime uniquement le CENTER
 
 
             add(scrollPane, BorderLayout.CENTER);

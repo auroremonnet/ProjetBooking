@@ -22,7 +22,7 @@ public class MonCompteView extends JFrame {
         this.controller = controller;
 
         setTitle("Accueil Client");
-        setSize(900, 750);
+        setSize(900, 700);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
