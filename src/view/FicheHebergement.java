@@ -2,8 +2,6 @@ package view;
 
 import controller.BookingController;
 import controller.ReservationController;
-import dao.AvisDAO;
-import model.Avis;
 import model.Client;
 import model.Hebergement;
 import model.Reservation;
@@ -16,8 +14,10 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
-import java.util.List;
 
+/**
+ * Affiche le détail d'un hébergement, permet de réserver et de lancer le paiement.
+ */
 public class FicheHebergement extends JFrame {
 
     private final Connection connection;
@@ -71,6 +71,7 @@ public class FicheHebergement extends JFrame {
         titre.setFont(new Font("Arial", Font.BOLD, 22));
         header.add(titre, BorderLayout.CENTER);
 
+        // Menu déroulant
         JPopupMenu menu = new JPopupMenu();
         JMenuItem itemAccueil = new JMenuItem("🏠 Accueil");
         JMenuItem itemMonCompte = new JMenuItem("👤 Mon compte");
@@ -88,8 +89,6 @@ public class FicheHebergement extends JFrame {
         btnMenu.setFont(new Font("Arial", Font.PLAIN, 14));
         btnMenu.addActionListener(e -> menu.show(btnMenu, 0, btnMenu.getHeight()));
 
-        menu.add(itemAccueil);
-        menu.add(itemMonCompte);
         header.add(btnMenu, BorderLayout.EAST);
         add(header, BorderLayout.NORTH);
     }
@@ -100,6 +99,7 @@ public class FicheHebergement extends JFrame {
         center.setBorder(BorderFactory.createEmptyBorder(20, 80, 20, 80));
         center.setBackground(Color.WHITE);
 
+        // --- Image ---
         JLabel imgLabel = new JLabel();
         imgLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         try {
@@ -113,12 +113,14 @@ public class FicheHebergement extends JFrame {
         center.add(imgLabel);
         center.add(Box.createVerticalStrut(15));
 
+        // --- Nom ---
         JLabel nom = new JLabel(hebergement.getNom());
         nom.setFont(new Font("Arial", Font.BOLD, 20));
         nom.setAlignmentX(Component.CENTER_ALIGNMENT);
         center.add(nom);
         center.add(Box.createVerticalStrut(10));
 
+        // --- Infos hébergement ---
         JPanel infosPanel = createRoundedPanel();
         infosPanel.add(new JLabel("📍 Adresse : " + hebergement.getAdresse()));
         infosPanel.add(new JLabel("💶 Prix par nuit : " + hebergement.getPrix() + " €"));
@@ -126,6 +128,7 @@ public class FicheHebergement extends JFrame {
         center.add(infosPanel);
         center.add(Box.createVerticalStrut(20));
 
+        // --- Détails sélection utilisateur ---
         JPanel recap = createRoundedPanel();
         recap.setMaximumSize(new Dimension(500, 120));
         recap.add(new JLabel("📋 Vos données sélectionnées"));
@@ -135,6 +138,7 @@ public class FicheHebergement extends JFrame {
         center.add(recap);
         center.add(Box.createVerticalStrut(20));
 
+        // --- Prix total ---
         long nbJours = ChronoUnit.DAYS.between(dateArrivee, dateDepart);
         double total = nbJours * hebergement.getPrix();
         JPanel paiementPanel = createRoundedPanel();
@@ -143,6 +147,7 @@ public class FicheHebergement extends JFrame {
         center.add(paiementPanel);
         center.add(Box.createVerticalStrut(30));
 
+        // --- Bouton Payer ---
         JButton btnValider = new JButton("Payer et confirmer");
         btnValider.setBackground(Color.decode("#598d90"));
         btnValider.setForeground(Color.WHITE);
@@ -153,47 +158,8 @@ public class FicheHebergement extends JFrame {
         btnValider.addActionListener(e -> doReservationAndPayment(total));
         center.add(btnValider);
 
-        // 🔄 Ajout de la section avis ici
-        buildAvisSection(center);
-
         add(center, BorderLayout.CENTER);
     }
-
-    private void buildAvisSection(JPanel parent) {
-        try {
-            AvisDAO dao = new AvisDAO(connection);
-            List<Avis> avisList = dao.getAvisPourHebergement(hebergement.getIdHebergement());
-
-            JPanel avisPanel = createRoundedPanel();
-            avisPanel.setBackground(new Color(245, 245, 245));
-            avisPanel.setMaximumSize(new Dimension(600, 600));
-            avisPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-
-            if (!avisList.isEmpty()) {
-                double moyenne = avisList.stream().mapToInt(Avis::getNote).average().orElse(0);
-                JLabel moyenneLabel = new JLabel("⭐ Moyenne des avis : " + String.format("%.1f", moyenne) + " / 5");
-                moyenneLabel.setFont(new Font("Arial", Font.BOLD, 16));
-                avisPanel.add(moyenneLabel);
-            } else {
-                avisPanel.add(new JLabel("Aucun avis pour cet hébergement."));
-            }
-
-            avisPanel.add(Box.createVerticalStrut(10));
-
-            for (Avis avis : avisList) {
-                JLabel lbl = new JLabel("• Note : " + avis.getNote() + " – " + avis.getCommentaire());
-                avisPanel.add(lbl);
-            }
-
-            parent.add(Box.createVerticalStrut(30));
-            parent.add(avisPanel);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            parent.add(new JLabel("Erreur de chargement des avis."));
-        }
-    }
-
 
     private void doReservationAndPayment(double montant) {
         try {

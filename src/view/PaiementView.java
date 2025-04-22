@@ -6,12 +6,16 @@ import dao.PaiementDAO;
 import model.Client;
 import model.MoyenPaiement;
 import model.Paiement;
+import model.Hebergement;
+import java.time.LocalDate;
+
 
 import javax.swing.*;
 import java.awt.*;
 import java.sql.Connection;
 import java.sql.Timestamp;
 import java.time.Instant;
+
 
 /**
  * Fenêtre de paiement CB (4 chiffres, MM/AA, CVV), avec design harmonisé.
@@ -22,18 +26,42 @@ public class PaiementView extends JFrame {
     private final Client client;
     private final int idResa;
     private final double montant;
+    private final Hebergement hebergement;
+    private final LocalDate dateArrivee;
+    private final LocalDate dateDepart;
+    private final int nbParents;
+    private final int nbEnfants;
+    private final int nbLits;
+
 
     private JTextField tfNum, tfExp, tfCvv;
 
-    public PaiementView(Connection conn, BookingController controller, Client client, int idResa, double montant) {
+    public PaiementView(Connection conn,
+                        BookingController controller,
+                        Client client,
+                        int idResa,
+                        double montant,
+                        Hebergement hebergement,
+                        LocalDate dateArrivee,
+                        LocalDate dateDepart,
+                        int nbParents,
+                        int nbEnfants,
+                        int nbLits) {
         this.conn = conn;
         this.controller = controller;
         this.client = client;
         this.idResa = idResa;
         this.montant = montant;
 
+        this.hebergement = hebergement;
+        this.dateArrivee = dateArrivee;
+        this.dateDepart = dateDepart;
+        this.nbParents = nbParents;
+        this.nbEnfants = nbEnfants;
+        this.nbLits = nbLits;
+
         setTitle("💳 Paiement Carte bancaire");
-        setSize(600, 500);
+        setSize(800, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -45,13 +73,16 @@ public class PaiementView extends JFrame {
         setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
 
+
     private void buildHeader() {
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(Color.decode("#7ac2c7"));
         header.setPreferredSize(new Dimension(600, 60));
         JLabel titre = new JLabel("Paiement", SwingConstants.CENTER);
-        titre.setFont(new Font("Arial", Font.BOLD, 22));
+        titre.setFont(new Font("Arial", Font.BOLD, 34));
+        titre.setForeground(Color.WHITE);
         header.add(titre, BorderLayout.CENTER);
+        add(header, BorderLayout.NORTH);
 
         // Menu déroulant
         JPopupMenu menu = new JPopupMenu();
@@ -73,7 +104,6 @@ public class PaiementView extends JFrame {
         btnMenu.setContentAreaFilled(false);
         btnMenu.setFont(new Font("Arial", Font.PLAIN, 14));
         btnMenu.addActionListener(e -> menu.show(btnMenu, 0, btnMenu.getHeight()));
-
         header.add(btnMenu, BorderLayout.EAST);
         add(header, BorderLayout.NORTH);
     }
@@ -110,6 +140,24 @@ public class PaiementView extends JFrame {
         btnPayer.setAlignmentX(Component.CENTER_ALIGNMENT);
         btnPayer.addActionListener(e -> doPayment());
         main.add(btnPayer);
+        main.add(Box.createVerticalStrut(15)); // espace entre les deux boutons
+
+        JButton btnRetour = new JButton("Retour");
+        btnRetour.setBackground(Color.decode("#7ac2c7"));
+        btnRetour.setForeground(Color.BLACK);
+        btnRetour.setFont(new Font("Arial", Font.PLAIN, 16));
+        btnRetour.setFocusPainted(false);
+        btnRetour.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btnRetour.setPreferredSize(new Dimension(150, 40));
+
+        btnRetour.addActionListener(e -> {
+            dispose();
+            new FicheHebergement(conn, hebergement, client, dateArrivee, dateDepart, nbParents, nbEnfants, nbLits, controller);
+        });
+
+        main.add(btnRetour);
+
+
 
         add(main, BorderLayout.CENTER);
     }

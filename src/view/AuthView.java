@@ -41,7 +41,8 @@ public class AuthView extends JFrame {
         header.setBackground(Color.decode("#7ac2c7"));
         header.setPreferredSize(new Dimension(700, 60));
         JLabel titre = new JLabel("Authentification", SwingConstants.CENTER);
-        titre.setFont(new Font("Arial", Font.BOLD, 22));
+        titre.setFont(new Font("Arial", Font.BOLD, 34));
+        titre.setForeground(Color.WHITE);
         header.add(titre, BorderLayout.CENTER);
         add(header, BorderLayout.NORTH);
 
@@ -49,7 +50,7 @@ public class AuthView extends JFrame {
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
         centerPanel.setBackground(Color.WHITE);
-        centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
 
         // --- PANNEAU CONNEXION ---
         JPanel loginPanel = createRoundedPanel();
