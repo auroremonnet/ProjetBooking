@@ -111,7 +111,7 @@ public class AccueilAdminView extends JFrame {
                     dispose(); new AuthView(new AuthController(connection), connection);
         });
         JButton btnMail = createRoundedButton("✉️ Envoyer un mail",
-                e -> new AdminGererMailView(connection));
+                e -> new AdminGererMailView(admin, connection));
         panel.add(btnMail);
         panel.add(Box.createVerticalStrut(15));
 

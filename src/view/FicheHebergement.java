@@ -190,7 +190,19 @@ public class FicheHebergement extends JFrame {
                     .getIdReservation();
 
             dispose();
-            new PaiementView(connection, controller, client, idResa, montant);
+            new PaiementView(
+                    connection,
+                    controller,
+                    client,
+                    idResa,
+                    montant,
+                    hebergement,
+                    dateArrivee,
+                    dateDepart,
+                    nbParents,
+                    nbEnfants,
+                    nbLits
+            );
 
         } catch (Exception ex) {
             ex.printStackTrace();
