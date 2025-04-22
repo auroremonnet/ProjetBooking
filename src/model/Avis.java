@@ -19,6 +19,10 @@ public class Avis {
         this.dateAvis = dateAvis;
     }
 
+    public Avis(int idClient, int idHebergement, int note, String commentaire) {
+        this(0, idClient, idHebergement, note, commentaire, null);
+    }
+
     public int getIdAvis() { return idAvis; }
     public int getIdClient() { return idClient; }
     public int getIdHebergement() { return idHebergement; }

@@ -149,4 +149,29 @@ public class HebergementDAO {
 
         return results;
     }
+
+    // ✅ Recherche un hébergement par ID (ajouté pour BookingController)
+    public Hebergement findById(int id) throws SQLException {
+        String sql = "SELECT * FROM Hebergement WHERE idHebergement = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return new Hebergement(
+                        rs.getInt("idHebergement"),
+                        rs.getString("nom"),
+                        rs.getString("adresse"),
+                        rs.getString("localisation"),
+                        rs.getString("description"),
+                        rs.getDouble("prix"),
+                        rs.getString("categorie"),
+                        rs.getString("photos"),
+                        rs.getString("options"),
+                        rs.getInt("capacite_max"),
+                        rs.getInt("nombre_lits")
+                );
+            }
+        }
+        return null;
+    }
 }
