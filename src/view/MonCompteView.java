@@ -121,6 +121,25 @@ public class MonCompteView extends JFrame {
         mainPanel.add(mailPanel);
         mainPanel.add(Box.createVerticalStrut(20));
 
+        JPanel mesReservationsPanel = createRoundedPanel(new Color(122, 194, 199));
+        mesReservationsPanel.setLayout(new BoxLayout(mesReservationsPanel, BoxLayout.Y_AXIS));
+        JButton mesReservationsBtn = new JButton("📆 Mes Réservations");
+        mesReservationsBtn.setFont(new Font("Arial", Font.BOLD, 18));
+        mesReservationsBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        mesReservationsBtn.setBackground(new Color(122, 194, 199));
+        mesReservationsBtn.setForeground(Color.BLACK);
+        mesReservationsBtn.setFocusPainted(false);
+        mesReservationsBtn.setBorder(BorderFactory.createLineBorder(new Color(122, 194, 199), 2, true));
+
+        mesReservationsBtn.addActionListener(e -> {
+            dispose();
+            new MesReservationsView(client, connection, controller);
+        });
+
+        mesReservationsPanel.add(mesReservationsBtn);
+        mainPanel.add(mesReservationsPanel);
+        mainPanel.add(Box.createVerticalStrut(20));
+
         // Boutons Accueil & Déconnexion côte à côte
         JPanel buttonPanel = new JPanel();
         buttonPanel.setOpaque(false);
