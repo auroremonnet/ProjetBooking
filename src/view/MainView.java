@@ -66,7 +66,7 @@ public class MainView extends JFrame {
             dispose();
             new MainView(controller, client, connection);
         });
-        itemMonCompte.addActionListener(e -> new MonCompteView(client, connection));
+        itemMonCompte.addActionListener(e -> new MonCompteView(client, connection, controller));
         menu.add(itemAccueil);
         menu.add(itemMonCompte);
 

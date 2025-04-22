@@ -24,4 +24,9 @@ public class ReservationController {
     public boolean annuler(int idReservation) throws Exception {
         return reservationDAO.annulerReservation(idReservation);
     }
+    public List<Reservation> reservations3DerniersMois(int idClient) throws Exception {
+        return reservationDAO.getReservationsDerniers3Mois(idClient);
+    }
+
+
 }

@@ -63,7 +63,7 @@ public class PaiementView extends JFrame {
             new MainView(controller, client, conn);
         });
 
-        itemMonCompte.addActionListener(e -> new MonCompteView(client, conn));
+        itemMonCompte.addActionListener(e -> new MonCompteView(client, conn, controller));
 
         menu.add(itemAccueil);
         menu.add(itemMonCompte);

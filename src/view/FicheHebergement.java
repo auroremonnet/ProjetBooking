@@ -81,7 +81,7 @@ public class FicheHebergement extends JFrame {
             new MainView(controller, client, connection);
         });
 
-        itemMonCompte.addActionListener(e -> new MonCompteView(client, connection));
+        itemMonCompte.addActionListener(e -> new MonCompteView(client, connection, controller));
 
         JButton btnMenu = new JButton("☰ Menu");
         btnMenu.setFocusPainted(false);
