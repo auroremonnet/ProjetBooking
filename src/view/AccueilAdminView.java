@@ -117,7 +117,7 @@ public class AccueilAdminView extends JFrame {
         panel.add(Box.createVerticalStrut(15));
         // juste après le bouton "Envoyer un mail"
         panel.add(createRoundedButton("Statistiques",
-                e -> new ReportingView(connection))
+                e -> new ReportingView(admin,connection))
         );
         panel.add(Box.createVerticalStrut(15));
 
