@@ -104,7 +104,7 @@ public class MonCompteView extends JFrame {
         // Mes Mails → devient un bouton
         JPanel mailPanel = createRoundedPanel(new Color(122, 194, 199));
         mailPanel.setLayout(new BoxLayout(mailPanel, BoxLayout.Y_AXIS));
-        JButton mailBtn = new JButton("📧 Mes Mails");
+        JButton mailBtn = new JButton("Mes Mails");
         mailBtn.setFont(new Font("Arial", Font.BOLD, 18));
         mailBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         mailBtn.setBackground(new Color(122, 194, 199));
@@ -123,7 +123,7 @@ public class MonCompteView extends JFrame {
 
         JPanel mesReservationsPanel = createRoundedPanel(new Color(122, 194, 199));
         mesReservationsPanel.setLayout(new BoxLayout(mesReservationsPanel, BoxLayout.Y_AXIS));
-        JButton mesReservationsBtn = new JButton("📆 Mes Réservations");
+        JButton mesReservationsBtn = new JButton("Mes Réservations");
         mesReservationsBtn.setFont(new Font("Arial", Font.BOLD, 18));
         mesReservationsBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         mesReservationsBtn.setBackground(new Color(122, 194, 199));
@@ -145,7 +145,7 @@ public class MonCompteView extends JFrame {
         buttonPanel.setOpaque(false);
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
 
-        JButton accueilBtn = new JButton("🏠 Accueil");
+        JButton accueilBtn = new JButton("Accueil");
         accueilBtn.setFont(new Font("Arial", Font.PLAIN, 14));
         accueilBtn.setBackground(new Color(122, 194, 199));
         accueilBtn.setForeground(Color.BLACK);
@@ -159,7 +159,7 @@ public class MonCompteView extends JFrame {
             new MainView(controller, client, connection);
         });
 
-        JButton logoutBtn = new JButton("🔒 Déconnexion");
+        JButton logoutBtn = new JButton("Déconnexion");
         logoutBtn.setFont(new Font("Arial", Font.PLAIN, 14));
         logoutBtn.setBackground(new Color(122, 194, 199));
         logoutBtn.setForeground(Color.BLACK);

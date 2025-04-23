@@ -60,7 +60,7 @@ public class PaiementView extends JFrame {
         this.nbEnfants = nbEnfants;
         this.nbLits = nbLits;
 
-        setTitle("💳 Paiement Carte bancaire");
+        setTitle("Paiement Carte bancaire");
         setSize(800, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -86,8 +86,8 @@ public class PaiementView extends JFrame {
 
         // Menu déroulant
         JPopupMenu menu = new JPopupMenu();
-        JMenuItem itemAccueil = new JMenuItem("🏠 Accueil");
-        JMenuItem itemMonCompte = new JMenuItem("👤 Mon compte");
+        JMenuItem itemAccueil = new JMenuItem("Accueil");
+        JMenuItem itemMonCompte = new JMenuItem("Mon compte");
 
         itemAccueil.addActionListener(e -> {
             dispose();
@@ -114,7 +114,7 @@ public class PaiementView extends JFrame {
         main.setBorder(BorderFactory.createEmptyBorder(30, 80, 30, 80));
         main.setBackground(Color.WHITE);
 
-        JLabel lblMontant = new JLabel("💶 À payer : " + montant + " €");
+        JLabel lblMontant = new JLabel("À payer : " + montant + " €");
         lblMontant.setFont(new Font("Arial", Font.BOLD, 18));
         lblMontant.setAlignmentX(Component.CENTER_ALIGNMENT);
         main.add(lblMontant);

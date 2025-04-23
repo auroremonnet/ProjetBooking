@@ -54,7 +54,7 @@ public class AuthView extends JFrame {
 
         // --- PANNEAU CONNEXION ---
         JPanel loginPanel = createRoundedPanel();
-        JLabel loginTitle = new JLabel("🔐 Connexion");
+        JLabel loginTitle = new JLabel("Connexion");
         loginTitle.setFont(new Font("Arial", Font.BOLD, 16));
         loginTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
         loginPanel.add(loginTitle);
@@ -86,7 +86,7 @@ public class AuthView extends JFrame {
 
         // --- PANNEAU INSCRIPTION ---
         JPanel registerPanel = createRoundedPanel();
-        JLabel regTitle = new JLabel("📝 Créer un compte");
+        JLabel regTitle = new JLabel("Créer un compte");
         regTitle.setFont(new Font("Arial", Font.BOLD, 16));
         regTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
         registerPanel.add(regTitle);

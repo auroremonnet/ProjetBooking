@@ -174,19 +174,19 @@ public class AdminGererProprieteView extends JFrame {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
         buttonPanel.setOpaque(false);
 
-        JButton retourBtn = createStyledButton("⬅ Retour");
+        JButton retourBtn = createStyledButton(" Retour");
         retourBtn.addActionListener(e -> {
             dispose();
             new AccueilAdminView(null, connection);
         });
 
-        JButton ajouterBtn = createStyledButton("➕ Ajouter");
+        JButton ajouterBtn = createStyledButton(" Ajouter");
         ajouterBtn.addActionListener(e -> ajouterHebergement());
 
-        JButton supprimerBtn = createStyledButton("❌ Supprimer");
+        JButton supprimerBtn = createStyledButton(" Supprimer");
         supprimerBtn.addActionListener(e -> supprimerHebergement());
 
-        JButton refreshBtn = createStyledButton("🔄 Rafraîchir");
+        JButton refreshBtn = createStyledButton(" Rafraîchir");
         refreshBtn.addActionListener(e -> chargerHebergements());
 
         buttonPanel.add(retourBtn);

@@ -143,7 +143,7 @@ public class FicheHebergement extends JFrame {
         double total = nbJours * hebergement.getPrix();
         JPanel paiementPanel = createRoundedPanel();
         paiementPanel.setMaximumSize(new Dimension(500, 80));
-        paiementPanel.add(new JLabel("💵 Prix total pour " + nbJours + " nuit(s) : " + total + " €"));
+        paiementPanel.add(new JLabel("Prix total pour " + nbJours + " nuit(s) : " + total + " €"));
         center.add(paiementPanel);
         center.add(Box.createVerticalStrut(30));
 

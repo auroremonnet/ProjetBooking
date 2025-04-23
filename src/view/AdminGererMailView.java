@@ -166,15 +166,23 @@ public class AdminGererMailView extends JFrame {
         return form;
     }
 
+    // Dans AdminGererMailView.java
+
+    /**
+     * Recharge la boîte d’envoi : seuls les mails émis par l’admin courant.
+     */
     private void reloadEnvoi() {
         envoiBox.removeAll();
         envoiBox.add(new JLabel("Boîte d’envoi – 10 derniers mails envoyés"));
         envoiBox.add(Box.createVerticalStrut(10));
+
         try {
             MailDAO dao = new MailDAO(connection);
+            // UNIQUEMENT les mails où l’admin est expéditeur
             List<Mail> list = dao.getDerniersMailsEnvoyesParAdmin(
                     admin.getIdAdministrateur(), 10
             );
+
             if (list.isEmpty()) {
                 envoiBox.add(new JLabel("(vide)"));
             } else {
@@ -183,45 +191,51 @@ public class AdminGererMailView extends JFrame {
                     String clientNom = dao.getClientNomPrenom(m.getIdClient());
                     envoiBox.add(new JLabel(
                             "→ " + clientNom
-                                    + " [" + m.getObjet() + "] "
-                                    + m.getContenu()
+                                    + "  [" + m.getObjet() + "]  " + m.getContenu()
                     ));
                     envoiBox.add(Box.createVerticalStrut(5));
                 }
             }
         } catch (Exception ex) {
-            envoiBox.add(new JLabel("Erreur de chargement : " + ex.getMessage()));
+            envoiBox.add(new JLabel("Erreur de chargement : " + ex.getMessage()));
         }
+
         envoiBox.revalidate();
         envoiBox.repaint();
     }
 
+    /**
+     * Recharge la boîte de réception : seuls les mails émis par les clients.
+     */
     private void reloadReception() {
         receptionBox.removeAll();
         receptionBox.add(new JLabel("Boîte de réception – 10 derniers mails reçus"));
         receptionBox.add(Box.createVerticalStrut(10));
+
         try {
             MailDAO dao = new MailDAO(connection);
+            // UNIQUEMENT les mails où l’admin est destinataire
             List<Mail> list = dao.getDerniersMailsRecusPourAdmin(
                     admin.getIdAdministrateur(), 10
             );
+
             if (list.isEmpty()) {
                 receptionBox.add(new JLabel("(vide)"));
             } else {
                 for (Mail m : list) {
                     // expéditeur = client
-                    String clientNom = dao.getClientNomPrenom(m.getIdAdministrateur());
+                    String clientNom = dao.getClientNomPrenom(m.getIdClient());
                     receptionBox.add(new JLabel(
                             "← " + clientNom
-                                    + " [" + m.getObjet() + "] "
-                                    + m.getContenu()
+                                    + "  [" + m.getObjet() + "]  " + m.getContenu()
                     ));
                     receptionBox.add(Box.createVerticalStrut(5));
                 }
             }
         } catch (Exception ex) {
-            receptionBox.add(new JLabel("Erreur de chargement : " + ex.getMessage()));
+            receptionBox.add(new JLabel("Erreur de chargement : " + ex.getMessage()));
         }
+
         receptionBox.revalidate();
         receptionBox.repaint();
     }
