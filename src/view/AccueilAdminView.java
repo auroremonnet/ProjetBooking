@@ -6,6 +6,7 @@ import model.Administrateur;
 import javax.swing.*;
 import java.awt.*;
 import java.sql.Connection;
+import view.ReportingView;
 
 public class AccueilAdminView extends JFrame {
     private final Connection connection;
@@ -106,14 +107,20 @@ public class AccueilAdminView extends JFrame {
                 e -> new AdminGererClientView(connection));
         JButton btn3 = createRoundedButton("Ajouter des réductions",
                 e -> new AdminGererReductionView());
-        JButton logoutBtn = createRoundedButton("🔒 Déconnexion",
+        JButton logoutBtn = createRoundedButton(" Déconnexion",
                 e -> {
                     dispose(); new AuthView(new AuthController(connection), connection);
         });
-        JButton btnMail = createRoundedButton("✉️ Envoyer un mail",
+        JButton btnMail = createRoundedButton("Envoyer un mail",
                 e -> new AdminGererMailView(admin, connection));
         panel.add(btnMail);
         panel.add(Box.createVerticalStrut(15));
+        // juste après le bouton "Envoyer un mail"
+        panel.add(createRoundedButton("Statistiques",
+                e -> new ReportingView(connection))
+        );
+        panel.add(Box.createVerticalStrut(15));
+
 
 
         panel.add(btn1);
@@ -131,6 +138,7 @@ public class AccueilAdminView extends JFrame {
         setVisible(true);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
+
 
     private JButton createRoundedButton(String text, java.awt.event.ActionListener action) {
         JButton button = new JButton(text);

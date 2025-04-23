@@ -1,8 +1,12 @@
+// dao/HebergementDAO.java
 package dao;
 
 import model.Hebergement;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,8 +17,8 @@ public class HebergementDAO {
         this.connection = connection;
     }
 
-    // ✅ Récupère tous les hébergements
-    public List<Hebergement> getAllHebergements() throws Exception {
+    /** Récupère tous les hébergements */
+    public List<Hebergement> getAllHebergements() throws SQLException {
         List<Hebergement> liste = new ArrayList<>();
         String sql = "SELECT * FROM Hebergement";
         try (PreparedStatement ps = connection.prepareStatement(sql);
@@ -38,10 +42,11 @@ public class HebergementDAO {
         return liste;
     }
 
-    // ✅ Recherche filtrée
-    public List<Hebergement> searchHebergements(String lieu, String categorie, double prixMax) throws Exception {
+    /** Recherche filtrée par lieu, catégorie et prix max */
+    public List<Hebergement> searchHebergements(String lieu, String categorie, double prixMax) throws SQLException {
         List<Hebergement> resultats = new ArrayList<>();
-        String sql = "SELECT * FROM Hebergement WHERE localisation LIKE ? AND categorie LIKE ? AND prix <= ?";
+        String sql = "SELECT * FROM Hebergement "
+                + "WHERE localisation LIKE ? AND categorie LIKE ? AND prix <= ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, "%" + lieu + "%");
             ps.setString(2, "%" + categorie + "%");
@@ -67,9 +72,11 @@ public class HebergementDAO {
         return resultats;
     }
 
-    // ✅ Ajouter un hébergement
-    public boolean ajouter(Hebergement h) throws Exception {
-        String sql = "INSERT INTO Hebergement (nom, adresse, localisation, description, prix, categorie, photos, options, capacite_max, nombre_lits) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    /** Ajoute un nouvel hébergement */
+    public boolean ajouter(Hebergement h) throws SQLException {
+        String sql = "INSERT INTO Hebergement "
+                + "(nom, adresse, localisation, description, prix, categorie, photos, options, capacite_max, nombre_lits) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, h.getNom());
             ps.setString(2, h.getAdresse());
@@ -85,8 +92,8 @@ public class HebergementDAO {
         }
     }
 
-    // ✅ Supprimer
-    public boolean supprimer(int id) throws Exception {
+    /** Supprime un hébergement par son ID */
+    public boolean supprimer(int id) throws SQLException {
         String sql = "DELETE FROM Hebergement WHERE idHebergement = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -94,9 +101,13 @@ public class HebergementDAO {
         }
     }
 
-    // ✅ Modifier
-    public boolean mettreAJour(Hebergement h) throws Exception {
-        String sql = "UPDATE Hebergement SET nom = ?, adresse = ?, localisation = ?, description = ?, prix = ?, categorie = ?, photos = ?, options = ?, capacite_max = ?, nombre_lits = ? WHERE idHebergement = ?";
+    /** Met à jour un hébergement existant */
+    public boolean mettreAJour(Hebergement h) throws SQLException {
+        String sql = "UPDATE Hebergement SET "
+                + "nom = ?, adresse = ?, localisation = ?, description = ?, "
+                + "prix = ?, categorie = ?, photos = ?, options = ?, "
+                + "capacite_max = ?, nombre_lits = ? "
+                + "WHERE idHebergement = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, h.getNom());
             ps.setString(2, h.getAdresse());
@@ -113,63 +124,61 @@ public class HebergementDAO {
         }
     }
 
-    // ✅ Recherche avancée
+    /** Recherche avancée (localisation, catégorie, options) */
     public List<Hebergement> rechercherHebergements(String localisation, String categorie, String options) throws SQLException {
         List<Hebergement> results = new ArrayList<>();
-        String sql = "SELECT * FROM Hebergement WHERE 1=1";
+        StringBuilder sql = new StringBuilder("SELECT * FROM Hebergement WHERE 1=1");
+        if (!localisation.isEmpty()) sql.append(" AND localisation LIKE ?");
+        if (!categorie.isEmpty())    sql.append(" AND categorie    LIKE ?");
+        if (!options.isEmpty())      sql.append(" AND options      LIKE ?");
 
-        if (!localisation.isEmpty()) sql += " AND localisation LIKE ?";
-        if (!categorie.isEmpty()) sql += " AND categorie LIKE ?";
-        if (!options.isEmpty()) sql += " AND options LIKE ?";
-
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            int index = 1;
-            if (!localisation.isEmpty()) ps.setString(index++, "%" + localisation + "%");
-            if (!categorie.isEmpty()) ps.setString(index++, "%" + categorie + "%");
-            if (!options.isEmpty()) ps.setString(index++, "%" + options + "%");
-
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                Hebergement h = new Hebergement(
-                        rs.getInt("idHebergement"),
-                        rs.getString("nom"),
-                        rs.getString("adresse"),
-                        rs.getString("localisation"),
-                        rs.getString("description"),
-                        rs.getDouble("prix"),
-                        rs.getString("categorie"),
-                        rs.getString("photos"),
-                        rs.getString("options"),
-                        rs.getInt("capacite_max"),
-                        rs.getInt("nombre_lits")
-                );
-                results.add(h);
+        try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+            int idx = 1;
+            if (!localisation.isEmpty()) ps.setString(idx++, "%" + localisation + "%");
+            if (!categorie.isEmpty())    ps.setString(idx++, "%" + categorie    + "%");
+            if (!options.isEmpty())      ps.setString(idx++, "%" + options      + "%");
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    results.add(new Hebergement(
+                            rs.getInt("idHebergement"),
+                            rs.getString("nom"),
+                            rs.getString("adresse"),
+                            rs.getString("localisation"),
+                            rs.getString("description"),
+                            rs.getDouble("prix"),
+                            rs.getString("categorie"),
+                            rs.getString("photos"),
+                            rs.getString("options"),
+                            rs.getInt("capacite_max"),
+                            rs.getInt("nombre_lits")
+                    ));
+                }
             }
         }
-
         return results;
     }
 
-    // ✅ Recherche un hébergement par ID (ajouté pour BookingController)
+    /** Recherche un hébergement par son ID */
     public Hebergement findById(int id) throws SQLException {
         String sql = "SELECT * FROM Hebergement WHERE idHebergement = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, id);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return new Hebergement(
-                        rs.getInt("idHebergement"),
-                        rs.getString("nom"),
-                        rs.getString("adresse"),
-                        rs.getString("localisation"),
-                        rs.getString("description"),
-                        rs.getDouble("prix"),
-                        rs.getString("categorie"),
-                        rs.getString("photos"),
-                        rs.getString("options"),
-                        rs.getInt("capacite_max"),
-                        rs.getInt("nombre_lits")
-                );
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new Hebergement(
+                            rs.getInt("idHebergement"),
+                            rs.getString("nom"),
+                            rs.getString("adresse"),
+                            rs.getString("localisation"),
+                            rs.getString("description"),
+                            rs.getDouble("prix"),
+                            rs.getString("categorie"),
+                            rs.getString("photos"),
+                            rs.getString("options"),
+                            rs.getInt("capacite_max"),
+                            rs.getInt("nombre_lits")
+                    );
+                }
             }
         }
         return null;
