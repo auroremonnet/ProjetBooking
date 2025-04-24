@@ -3,6 +3,7 @@ package controller;
 import dao.ClientDAO;
 import dao.HebergementDAO;
 import dao.ReductionClientDAO;
+import model.Administrateur;
 import model.Client;
 import model.Hebergement;
 import model.ReductionClient;
@@ -19,14 +20,32 @@ public class AdminController {
     private final HebergementDAO hebergementDAO;
     private final ClientDAO clientDAO;
     private final ReductionClientDAO reductionDAO;
+    private final Connection connection;
+    private Administrateur administrateur;
 
     /**
      * Initialise le contrôleur avec une connexion JDBC.
      */
     public AdminController(Connection conn) {
+        this.connection = conn;
         this.hebergementDAO = new HebergementDAO(conn);
         this.clientDAO      = new ClientDAO(conn);
         this.reductionDAO   = new ReductionClientDAO(conn);
+    }
+
+    /** Permet d'associer un administrateur à ce contrôleur */
+    public void setAdministrateur(Administrateur admin) {
+        this.administrateur = admin;
+    }
+
+    /** Récupère l'administrateur associé */
+    public Administrateur getAdministrateur() {
+        return this.administrateur;
+    }
+
+    /** Récupère la connexion associée */
+    public Connection getConnection() {
+        return this.connection;
     }
 
     // ===================== Hébergements =====================

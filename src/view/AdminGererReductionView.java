@@ -19,31 +19,54 @@ public class AdminGererReductionView extends JFrame {
     private void initialize() {
         setTitle("Gérer les Réductions");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(400, 180);
+        setSize(600, 400);
         setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
 
-        JPanel panel = new JPanel(new GridBagLayout());
+        // Header comme AccueilAdminView
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(new Color(122, 194, 199));
+        header.setPreferredSize(new Dimension(600, 70));
+        JLabel titre = new JLabel("Réduction", SwingConstants.CENTER);
+        titre.setFont(new Font("Arial", Font.BOLD, 34));
+        titre.setForeground(Color.WHITE);
+        header.add(titre, BorderLayout.CENTER);
+        add(header, BorderLayout.NORTH);
+
+        // Contenu centré avec bord arrondi
+        JPanel content = new JPanel() {
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(89, 141, 144));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
+            }
+        };
+        content.setLayout(new GridBagLayout());
+        content.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
+        content.setBackground(new Color(0, 0, 0, 0));
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
-
-        // Label
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.anchor = GridBagConstraints.WEST;
-        panel.add(new JLabel("Taux de réduction pour les anciens clients (%):"), gbc);
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        JLabel label = new JLabel("Taux de réduction pour les anciens clients (%):");
+        label.setForeground(Color.WHITE);
+        label.setFont(new Font("Arial", Font.BOLD, 16));
+        content.add(label, gbc);
 
         // Spinner
         spinnerTaux = new JSpinner(new SpinnerNumberModel(5.0, 0.0, 100.0, 0.5));
-        gbc.gridx = 1;
-        panel.add(spinnerTaux, gbc);
+        gbc.gridy++;
+        content.add(spinnerTaux, gbc);
 
-        // Bouton
+        // Bouton enregistrer
         btnEnregistrer = new JButton("Enregistrer");
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.CENTER;
-        panel.add(btnEnregistrer, gbc);
+        gbc.gridy++;
+        content.add(btnEnregistrer, gbc);
 
         // Charger la valeur actuelle depuis la base
         try {
@@ -64,6 +87,24 @@ public class AdminGererReductionView extends JFrame {
             }
         });
 
-        add(panel);
+        add(content, BorderLayout.CENTER);
+
+        // Bouton retour
+        JButton btnRetour = new JButton("Retour");
+        btnRetour.setBackground(new Color(122, 194, 199));
+        btnRetour.setForeground(Color.BLACK);
+        btnRetour.setFont(new Font("Arial", Font.BOLD, 16));
+        btnRetour.setFocusPainted(false);
+        btnRetour.setPreferredSize(new Dimension(120, 40));
+        btnRetour.addActionListener(e -> {
+            dispose();
+            new AccueilAdminView(controller.getAdministrateur(), controller.getConnection());
+        });
+
+        JPanel footer = new JPanel();
+        footer.setBackground(Color.WHITE);
+        footer.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        footer.add(btnRetour);
+        add(footer, BorderLayout.SOUTH);
     }
 }
