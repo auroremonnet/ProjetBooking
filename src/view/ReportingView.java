@@ -25,9 +25,10 @@ public class ReportingView extends JFrame {
     private final ReportingDAO reportingDAO;
     private final DefaultPieDataset pieDataset = new DefaultPieDataset();
     private final JComboBox<String> monthSelector;
+    private ChartPanel pieChartPanel; // ← ajout ici
 
     public ReportingView(Administrateur admin, Connection connection) {
-        this.admin      = admin;
+        this.admin = admin;
         this.connection = connection;
         this.reportingDAO = new ReportingDAO(connection);
 
@@ -42,8 +43,7 @@ public class ReportingView extends JFrame {
             @Override protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D)g;
-                g2.setRenderingHint(RenderingHints.
-                        KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(new Color(122, 194, 199));
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
             }
@@ -56,36 +56,30 @@ public class ReportingView extends JFrame {
         add(header, BorderLayout.NORTH);
 
         // === PANE CENTRAL ===
-        // à gauche : barres empilées
         ChartPanel barChartPanel = createChartPanel(createStackedBarChart());
 
-        // à droite : camembert + sélection du mois
-        JPanel rightPanel = new JPanel(new BorderLayout(10,10));
+        JPanel rightPanel = new JPanel(new BorderLayout(10, 10));
         rightPanel.setBackground(Color.WHITE);
-        rightPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+        rightPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // combobox mois
         monthSelector = new JComboBox<>();
-        for(int m=1; m<=12; m++){
+        for (int m = 1; m <= 12; m++) {
             monthSelector.addItem(String.format("%02d", m));
         }
         monthSelector.setSelectedItem(String.format("%02d", LocalDate.now().getMonthValue()));
         monthSelector.addActionListener(e -> updatePieChart());
 
-        // ChartPanel du pie
-        JFreeChart pieChart = createPieChart((String)monthSelector.getSelectedItem());
-        ChartPanel piePanel = new ChartPanel(pieChart);
+        JFreeChart pieChart = createPieChart((String) monthSelector.getSelectedItem());
+        pieChartPanel = new ChartPanel(pieChart);
+        rightPanel.add(pieChartPanel, BorderLayout.CENTER);
 
-        // assemble
         JPanel topRight = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
         topRight.setBackground(Color.WHITE);
         topRight.add(new JLabel("Mois :"));
         topRight.add(monthSelector);
         rightPanel.add(topRight, BorderLayout.NORTH);
-        rightPanel.add(piePanel, BorderLayout.CENTER);
 
-        // Panel central en GridLayout 1×2
-        JPanel center = new JPanel(new GridLayout(1,2,10,0));
+        JPanel center = new JPanel(new GridLayout(1, 2, 10, 0));
         center.add(barChartPanel);
         center.add(rightPanel);
         add(center, BorderLayout.CENTER);
@@ -108,7 +102,6 @@ public class ReportingView extends JFrame {
 
         setVisible(true);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-
     }
 
     private ChartPanel createChartPanel(JFreeChart chart) {
@@ -118,22 +111,18 @@ public class ReportingView extends JFrame {
         return panel;
     }
 
-    /** Crée le stacked bar chart global */
     private JFreeChart createStackedBarChart() {
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
         int year = LocalDate.now().getYear();
 
         try {
-            Map<String, Map<String,Integer>> data =
-                    reportingDAO.getReservationCountByCategoryAndMonth(year);
+            Map<String, Map<String, Integer>> data = reportingDAO.getReservationCountByCategoryAndMonth(year);
             data.forEach((categorie, countsByMonth) -> {
                 countsByMonth.forEach((mois, cnt) ->
-                        dataset.addValue(cnt, categorie, mois)
-                );
+                        dataset.addValue(cnt, categorie, mois));
             });
-        } catch(Exception ex) {
-            JOptionPane.showMessageDialog(this,
-                    "Erreur chargement barres empilées :\n" + ex.getMessage(),
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Erreur chargement barres empilées :\n" + ex.getMessage(),
                     "Erreur", JOptionPane.ERROR_MESSAGE);
         }
 
@@ -144,69 +133,54 @@ public class ReportingView extends JFrame {
                 true, true, false
         );
         CategoryPlot plot = chart.getCategoryPlot();
-        plot.setBackgroundPaint(new Color(250,250,250));
+        plot.setBackgroundPaint(new Color(250, 250, 250));
         plot.setRangeGridlinePaint(Color.GRAY);
         plot.getDomainAxis().setCategoryLabelPositions(
-                CategoryLabelPositions.createUpRotationLabelPositions(Math.PI/6.0)
+                CategoryLabelPositions.createUpRotationLabelPositions(Math.PI / 6.0)
         );
         return chart;
     }
+
     private JFreeChart createPieChart(String mois) {
-        // Réinitialise le dataset
         pieDataset.clear();
-
         try {
-            // Récupère la map : catégorie -> (mois -> count)
-            Map<String, Map<String,Integer>> all =
-                    reportingDAO.getReservationCountByCategoryAndMonth(LocalDate.now().getYear());
-
-            // Pour chaque catégorie, on prend la valeur du mois sélectionné
-            for (var entry : all.entrySet()) {
-                String categorie = entry.getKey();
-                Integer cnt = entry.getValue().getOrDefault(mois, 0);
-                // Si > 0, on l'affiche ; sinon tu peux l'ignorer ou l'afficher à 0
-                pieDataset.setValue(categorie, cnt);
-            }
-        } catch(Exception ex) {
-            JOptionPane.showMessageDialog(this,
-                    "Erreur chargement camembert :\n" + ex.getMessage(),
-                    "Erreur", JOptionPane.ERROR_MESSAGE);
-        }
-
-        JFreeChart pie = ChartFactory.createPieChart(
-                "Répartition – mois " + mois,
-                pieDataset,
-                true, true, false
-        );
-        PiePlot plot = (PiePlot) pie.getPlot();
-        plot.setBackgroundPaint(Color.WHITE);
-        return pie;
-    }
-
-
-    /** Construit le pie chart pour le mois donné */
-    private void updatePieChart() {
-        String mois = (String) monthSelector.getSelectedItem();
-        pieDataset.clear();
-
-        try {
-            Map<String, Map<String,Integer>> all =
-                    reportingDAO.getReservationCountByCategoryAndMonth(LocalDate.now().getYear());
-
+            Map<String, Map<String, Integer>> all = reportingDAO.getReservationCountByCategoryAndMonth(LocalDate.now().getYear());
             for (var entry : all.entrySet()) {
                 String categorie = entry.getKey();
                 Integer cnt = entry.getValue().getOrDefault(mois, 0);
                 pieDataset.setValue(categorie, cnt);
             }
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Erreur mise à jour camembert :\n" + ex.getMessage(),
-                    "Erreur",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            JOptionPane.showMessageDialog(this, "Erreur chargement camembert :\n" + ex.getMessage(),
+                    "Erreur", JOptionPane.ERROR_MESSAGE);
         }
+
+        JFreeChart pie = ChartFactory.createPieChart("Répartition – mois " + mois, pieDataset, true, true, false);
+        PiePlot plot = (PiePlot) pie.getPlot();
+        plot.setBackgroundPaint(Color.WHITE);
+        return pie;
     }
 
-
+    private void updatePieChart() {
+        String mois = (String) monthSelector.getSelectedItem();
+        pieDataset.clear();
+        try {
+            Map<String, Map<String, Integer>> all = reportingDAO.getReservationCountByCategoryAndMonth(LocalDate.now().getYear());
+            for (var entry : all.entrySet()) {
+                String categorie = entry.getKey();
+                Integer cnt = entry.getValue().getOrDefault(mois, 0);
+                pieDataset.setValue(categorie, cnt);
+            }
+            JFreeChart updatedChart = ChartFactory.createPieChart(
+                    "Répartition – mois " + mois,
+                    pieDataset,
+                    true, true, false
+            );
+            updatedChart.getPlot().setBackgroundPaint(Color.WHITE);
+            pieChartPanel.setChart(updatedChart); // ← mise à jour dynamique
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Erreur mise à jour camembert :\n" + ex.getMessage(),
+                    "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 }
