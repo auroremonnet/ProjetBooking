@@ -57,6 +57,7 @@ public class MonCompteView extends JFrame {
         infoPanel.add(new JLabel("Mot de passe : " + client.getMotDePasse()));
         infoPanel.add(new JLabel("Adresse : " + client.getAdresse()));
         infoPanel.add(new JLabel("Téléphone : " + client.getTelephone()));
+        infoPanel.add(new JLabel("Statut client : " + client.getTypeClient()));
         infoPanel.add(Box.createVerticalStrut(10));
         mainPanel.add(infoPanel);
         mainPanel.add(Box.createVerticalStrut(20));
