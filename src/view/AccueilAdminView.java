@@ -1,12 +1,12 @@
 package view;
 
+import controller.AdminController;
 import controller.AuthController;
 import model.Administrateur;
 
 import javax.swing.*;
 import java.awt.*;
 import java.sql.Connection;
-import view.ReportingView;
 
 public class AccueilAdminView extends JFrame {
     private final Connection connection;
@@ -22,7 +22,6 @@ public class AccueilAdminView extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        // HEADER style MainView
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(new Color(122, 194, 199));
         header.setPreferredSize(new Dimension(900, 70));
@@ -33,13 +32,11 @@ public class AccueilAdminView extends JFrame {
         header.add(titre, BorderLayout.CENTER);
         add(header, BorderLayout.NORTH);
 
-        // PANEL CENTRAL
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
         panel.setBackground(Color.WHITE);
 
-        // PROFIL RECTANGLE GRIS CLAIR ARRONDI
         JPanel profilBox = new JPanel() {
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -54,7 +51,6 @@ public class AccueilAdminView extends JFrame {
         profilBox.setMaximumSize(new Dimension(300, 200));
         profilBox.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // PHOTO CENTRÉE
         String photoPath = "/resources/images/" + admin.getPhoto();
         java.net.URL imageUrl = getClass().getResource(photoPath);
 
@@ -70,7 +66,6 @@ public class AccueilAdminView extends JFrame {
         photo.setAlignmentX(Component.CENTER_ALIGNMENT);
         profilBox.add(photo);
 
-        // NOM PRÉNOM CENTRÉ
         JLabel nomPrenom = new JLabel(admin.getPrenom() + " " + admin.getNom());
         nomPrenom.setFont(new Font("Arial", Font.BOLD, 20));
         nomPrenom.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -80,7 +75,6 @@ public class AccueilAdminView extends JFrame {
         panel.add(profilBox);
         panel.add(Box.createVerticalStrut(20));
 
-        // INFO ADMIN (rectangle #598d90) ARRONDI
         JPanel infoPanel = new JPanel() {
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -100,36 +94,35 @@ public class AccueilAdminView extends JFrame {
         panel.add(infoPanel);
         panel.add(Box.createVerticalStrut(30));
 
-        // BOUTONS ARRONDIS #7ac2c7
         JButton btn1 = createRoundedButton("Ajouter / Supprimer des propriétés",
                 e -> new AdminGererProprieteView(connection));
         JButton btn2 = createRoundedButton("Gérer la clientèle",
                 e -> new AdminGererClientView(connection));
         JButton btn3 = createRoundedButton("Ajouter des réductions",
-                e -> new AdminGererReductionView());
-        JButton logoutBtn = createRoundedButton(" Déconnexion",
                 e -> {
-                    dispose(); new AuthView(new AuthController(connection), connection);
-        });
+                    AdminController controller = new AdminController(connection);
+                    new AdminGererReductionView(controller).setVisible(true);
+                });
+        JButton logoutBtn = createRoundedButton("Déconnexion",
+                e -> {
+                    dispose();
+                    new AuthView(new AuthController(connection), connection);
+                });
         JButton btnMail = createRoundedButton("Envoyer un mail",
                 e -> new AdminGererMailView(admin, connection));
+
         panel.add(btnMail);
         panel.add(Box.createVerticalStrut(15));
-        // juste après le bouton "Envoyer un mail"
         panel.add(createRoundedButton("Statistiques",
-                e -> new ReportingView(admin,connection))
-        );
+                e -> new ReportingView(admin, connection)));
         panel.add(Box.createVerticalStrut(15));
-
-
-
         panel.add(btn1);
         panel.add(Box.createVerticalStrut(15));
         panel.add(btn2);
         panel.add(Box.createVerticalStrut(15));
         panel.add(btn3);
         panel.add(Box.createVerticalStrut(30));
-        panel.add(btnMail); // <--- nouveau bouton ajouté ici
+        panel.add(btnMail);
         panel.add(Box.createVerticalStrut(30));
         panel.add(logoutBtn);
         panel.add(logoutBtn);
@@ -138,7 +131,6 @@ public class AccueilAdminView extends JFrame {
         setVisible(true);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
-
 
     private JButton createRoundedButton(String text, java.awt.event.ActionListener action) {
         JButton button = new JButton(text);
