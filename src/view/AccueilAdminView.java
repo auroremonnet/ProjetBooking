@@ -6,39 +6,63 @@ import model.Administrateur;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
+import java.net.URL;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class AccueilAdminView extends JFrame {
-    private final Connection connection;
+    private final Connection     connection;
     private final Administrateur admin;
 
     public AccueilAdminView(Administrateur admin, Connection connection) {
         this.connection = connection;
-        this.admin = admin;
+        this.admin      = admin;
 
+        // --- FENÊTRE PRINCIPALE ---
         setTitle("Accueil Administrateur");
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(900, 700);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
+        // --- HEADER ---
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(new Color(122, 194, 199));
-        header.setPreferredSize(new Dimension(900, 70));
-
+        header.setPreferredSize(new Dimension(0, 70));
         JLabel titre = new JLabel("Tableau de bord administrateur", SwingConstants.CENTER);
         titre.setFont(new Font("Arial", Font.BOLD, 34));
         titre.setForeground(Color.WHITE);
         header.add(titre, BorderLayout.CENTER);
         add(header, BorderLayout.NORTH);
 
+        // --- BODY PANEL ---
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
         panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
 
+        // === RÉCUPÉRATION DU NOM DE FICHIER PHOTO EN BDD ===
+        String filename = null;
+        try {
+            PreparedStatement ps = connection.prepareStatement(
+                    "SELECT photo FROM administrateur WHERE idAdministrateur = ?"
+            );
+            ps.setInt(1, admin.getIdAdministrateur());
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                filename = rs.getString("photo");
+            }
+            rs.close();
+            ps.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        // === PROFIL BOX ===
         JPanel profilBox = new JPanel() {
-            protected void paintComponent(Graphics g) {
+            @Override protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g;
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -51,22 +75,37 @@ public class AccueilAdminView extends JFrame {
         profilBox.setMaximumSize(new Dimension(300, 200));
         profilBox.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        String photoPath = "/resources/images/" + admin.getPhoto();
-        java.net.URL imageUrl = getClass().getResource(photoPath);
+        // --- CHARGEMENT DE L’IMAGE ---
+        JLabel photoLabel;
+        if (filename != null) {
+            // tentative classpath
+            String resourcePath = "images/" + filename;
+            URL    url          = getClass().getClassLoader().getResource(resourcePath);
 
-        JLabel photo;
-        if (imageUrl != null) {
-            ImageIcon icon = new ImageIcon(imageUrl);
-            Image scaled = icon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
-            photo = new JLabel(new ImageIcon(scaled));
+            if (url != null) {
+                ImageIcon icon = new ImageIcon(url);
+                Image     img  = icon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+                photoLabel = new JLabel(new ImageIcon(img));
+            } else {
+                // fallback fichier brut
+                File f = new File("resources/images/" + filename);
+                if (f.exists()) {
+                    ImageIcon icon = new ImageIcon(f.getAbsolutePath());
+                    Image     img  = icon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+                    photoLabel = new JLabel(new ImageIcon(img));
+                } else {
+                    System.err.println("❌ Photo introuvable : " + filename);
+                    photoLabel = new JLabel("📷 Photo manquante");
+                }
+            }
         } else {
-            System.err.println("❌ Image introuvable : " + photoPath);
-            photo = new JLabel("📷 Image manquante");
+            photoLabel = new JLabel("📷 Photo manquante");
         }
-        photo.setAlignmentX(Component.CENTER_ALIGNMENT);
-        profilBox.add(photo);
+        photoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        profilBox.add(photoLabel);
 
-        JLabel nomPrenom = new JLabel(admin.getPrenom() + " " + admin.getNom());
+        // --- NOM / PRÉNOM ---
+        JLabel nomPrenom = new JLabel(admin.getPrenom() + " " + admin.getNom(), SwingConstants.CENTER);
         nomPrenom.setFont(new Font("Arial", Font.BOLD, 20));
         nomPrenom.setAlignmentX(Component.CENTER_ALIGNMENT);
         nomPrenom.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
@@ -75,8 +114,9 @@ public class AccueilAdminView extends JFrame {
         panel.add(profilBox);
         panel.add(Box.createVerticalStrut(20));
 
-        JPanel infoPanel = new JPanel() {
-            protected void paintComponent(Graphics g) {
+        // --- INFO PANEL (EMAIL / MOT DE PASSE) ---
+        JPanel infoPanel = new JPanel(new GridLayout(2, 1)) {
+            @Override protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g;
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -84,52 +124,35 @@ public class AccueilAdminView extends JFrame {
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
             }
         };
-        infoPanel.setLayout(new GridLayout(2, 1));
         infoPanel.setMaximumSize(new Dimension(800, 80));
         infoPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
         infoPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-
         infoPanel.add(new JLabel("Email : " + admin.getEmail()));
         infoPanel.add(new JLabel("Mot de passe : " + admin.getMotDePasse()));
         panel.add(infoPanel);
         panel.add(Box.createVerticalStrut(30));
 
-        JButton btn1 = createRoundedButton("Ajouter / Supprimer des propriétés",
-                e -> new AdminGererProprieteView(connection));
-        JButton btn2 = createRoundedButton("Gérer la clientèle",
-                e -> new AdminGererClientView(connection));
-        JButton btn3 = createRoundedButton("Ajouter des réductions",
-                e -> {
-                    AdminController controller = new AdminController(connection);
-                    new AdminGererReductionView(controller).setVisible(true);
-                });
-        JButton logoutBtn = createRoundedButton("Déconnexion",
-                e -> {
-                    dispose();
-                    new AuthView(new AuthController(connection), connection);
-                });
-        JButton btnMail = createRoundedButton("Envoyer un mail",
-                e -> new AdminGererMailView(admin, connection));
-
-        panel.add(btnMail);
+        // --- BOUTONS ---
+        panel.add(createRoundedButton("Statistiques", e -> new ReportingView(admin, connection)));
         panel.add(Box.createVerticalStrut(15));
-        panel.add(createRoundedButton("Statistiques",
-                e -> new ReportingView(admin, connection)));
+        panel.add(createRoundedButton("Ajouter / Supprimer des propriétés", e -> new AdminGererProprieteView(connection)));
         panel.add(Box.createVerticalStrut(15));
-        panel.add(btn1);
+        panel.add(createRoundedButton("Gérer la clientèle", e -> new AdminGererClientView(connection)));
         panel.add(Box.createVerticalStrut(15));
-        panel.add(btn2);
-        panel.add(Box.createVerticalStrut(15));
-        panel.add(btn3);
+        panel.add(createRoundedButton("Ajouter des réductions", e -> {
+            //new AdminController(connection).openReductionView();
+        }));
         panel.add(Box.createVerticalStrut(30));
-        panel.add(btnMail);
+        panel.add(createRoundedButton("Envoyer un mail", e -> new AdminGererMailView(admin, connection)));
         panel.add(Box.createVerticalStrut(30));
-        panel.add(logoutBtn);
-        panel.add(logoutBtn);
+        panel.add(createRoundedButton("Déconnexion", e -> {
+            dispose();
+            new AuthView(new AuthController(connection), connection);
+        }));
 
         add(panel, BorderLayout.CENTER);
-        setVisible(true);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setVisible(true);
     }
 
     private JButton createRoundedButton(String text, java.awt.event.ActionListener action) {
@@ -142,7 +165,8 @@ public class AccueilAdminView extends JFrame {
         button.setMaximumSize(new Dimension(500, 50));
         button.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(122, 194, 199), 5, true),
-                BorderFactory.createEmptyBorder(10, 20, 10, 20)));
+                BorderFactory.createEmptyBorder(10, 20, 10, 20)
+        ));
         button.addActionListener(action);
         return button;
     }

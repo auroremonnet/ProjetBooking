@@ -33,7 +33,7 @@ public class AdministrateurDAO {
     }
 
     public boolean register(Administrateur admin) throws Exception {
-        String sql = "INSERT INTO Administrateur (nom, prenom, email, motDePasse) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO Administrateur (nom, prenom, email, motDePasse, photo) VALUES (?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, admin.getNom());
             ps.setString(2, admin.getPrenom());
