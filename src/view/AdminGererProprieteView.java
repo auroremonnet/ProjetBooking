@@ -1,7 +1,7 @@
 package view;
 
-import controller.AdminController;
 import model.Hebergement;
+import controller.AdminController;
 
 import javax.swing.*;
 import java.awt.*;
