@@ -30,6 +30,7 @@ public class HebergementDAO {
                         rs.getString("adresse"),
                         rs.getString("localisation"),
                         rs.getString("description"),
+                        rs.getString("complementDescription"),
                         rs.getDouble("prix"),
                         rs.getString("categorie"),
                         rs.getString("photos"),
@@ -59,6 +60,7 @@ public class HebergementDAO {
                             rs.getString("adresse"),
                             rs.getString("localisation"),
                             rs.getString("description"),
+                            rs.getString("complementDescription"),
                             rs.getDouble("prix"),
                             rs.getString("categorie"),
                             rs.getString("photos"),
@@ -75,19 +77,20 @@ public class HebergementDAO {
     /** Ajoute un nouvel hébergement */
     public boolean ajouter(Hebergement h) throws SQLException {
         String sql = "INSERT INTO Hebergement "
-                + "(nom, adresse, localisation, description, prix, categorie, photos, options, capacite_max, nombre_lits) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + "(nom, adresse, localisation, description, complementDescription, prix, categorie, photos, options, capacite_max, nombre_lits) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, h.getNom());
             ps.setString(2, h.getAdresse());
             ps.setString(3, h.getLocalisation());
             ps.setString(4, h.getDescription());
-            ps.setDouble(5, h.getPrix());
-            ps.setString(6, h.getCategorie());
-            ps.setString(7, h.getPhotos());
-            ps.setString(8, h.getOptions());
-            ps.setInt(9, h.getCapaciteMax());
-            ps.setInt(10, h.getNombreLits());
+            ps.setString(5, h.getComplementDescription());
+            ps.setDouble(6, h.getPrix());
+            ps.setString(7, h.getCategorie());
+            ps.setString(8, h.getPhotos());
+            ps.setString(9, h.getOptions());
+            ps.setInt(10, h.getCapaciteMax());
+            ps.setInt(11, h.getNombreLits());
             return ps.executeUpdate() == 1;
         }
     }
@@ -104,7 +107,7 @@ public class HebergementDAO {
     /** Met à jour un hébergement existant */
     public boolean mettreAJour(Hebergement h) throws SQLException {
         String sql = "UPDATE Hebergement SET "
-                + "nom = ?, adresse = ?, localisation = ?, description = ?, "
+                + "nom = ?, adresse = ?, localisation = ?, description = ?, complementDescription = ?, "
                 + "prix = ?, categorie = ?, photos = ?, options = ?, "
                 + "capacite_max = ?, nombre_lits = ? "
                 + "WHERE idHebergement = ?";
@@ -113,13 +116,14 @@ public class HebergementDAO {
             ps.setString(2, h.getAdresse());
             ps.setString(3, h.getLocalisation());
             ps.setString(4, h.getDescription());
-            ps.setDouble(5, h.getPrix());
-            ps.setString(6, h.getCategorie());
-            ps.setString(7, h.getPhotos());
-            ps.setString(8, h.getOptions());
-            ps.setInt(9, h.getCapaciteMax());
-            ps.setInt(10, h.getNombreLits());
-            ps.setInt(11, h.getIdHebergement());
+            ps.setString(5, h.getComplementDescription());
+            ps.setDouble(6, h.getPrix());
+            ps.setString(7, h.getCategorie());
+            ps.setString(8, h.getPhotos());
+            ps.setString(9, h.getOptions());
+            ps.setInt(10, h.getCapaciteMax());
+            ps.setInt(11, h.getNombreLits());
+            ps.setInt(12, h.getIdHebergement());
             return ps.executeUpdate() == 1;
         }
     }
@@ -145,6 +149,7 @@ public class HebergementDAO {
                             rs.getString("adresse"),
                             rs.getString("localisation"),
                             rs.getString("description"),
+                            rs.getString("complementDescription"),
                             rs.getDouble("prix"),
                             rs.getString("categorie"),
                             rs.getString("photos"),
@@ -171,6 +176,7 @@ public class HebergementDAO {
                             rs.getString("adresse"),
                             rs.getString("localisation"),
                             rs.getString("description"),
+                            rs.getString("complementDescription"),
                             rs.getDouble("prix"),
                             rs.getString("categorie"),
                             rs.getString("photos"),

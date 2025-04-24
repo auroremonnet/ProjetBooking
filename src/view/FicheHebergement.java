@@ -15,9 +15,6 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 
-/**
- * Affiche le détail d'un hébergement, permet de réserver et de lancer le paiement.
- */
 public class FicheHebergement extends JFrame {
 
     private final Connection connection;
@@ -71,7 +68,6 @@ public class FicheHebergement extends JFrame {
         titre.setFont(new Font("Arial", Font.BOLD, 22));
         header.add(titre, BorderLayout.CENTER);
 
-        // Menu déroulant
         JPopupMenu menu = new JPopupMenu();
         JMenuItem itemAccueil = new JMenuItem("🏠 Accueil");
         JMenuItem itemMonCompte = new JMenuItem("👤 Mon compte");
@@ -98,8 +94,8 @@ public class FicheHebergement extends JFrame {
         center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
         center.setBorder(BorderFactory.createEmptyBorder(20, 80, 20, 80));
         center.setBackground(Color.WHITE);
+        center.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // --- Image ---
         JLabel imgLabel = new JLabel();
         imgLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         try {
@@ -113,24 +109,33 @@ public class FicheHebergement extends JFrame {
         center.add(imgLabel);
         center.add(Box.createVerticalStrut(15));
 
-        // --- Nom ---
         JLabel nom = new JLabel(hebergement.getNom());
         nom.setFont(new Font("Arial", Font.BOLD, 20));
         nom.setAlignmentX(Component.CENTER_ALIGNMENT);
         center.add(nom);
         center.add(Box.createVerticalStrut(10));
 
-        // --- Infos hébergement ---
         JPanel infosPanel = createRoundedPanel();
+        infosPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
         infosPanel.add(new JLabel("📍 Adresse : " + hebergement.getAdresse()));
         infosPanel.add(new JLabel("💶 Prix par nuit : " + hebergement.getPrix() + " €"));
         infosPanel.add(new JLabel("🏠 Capacité : " + hebergement.getCapaciteMax() + " pers – " + hebergement.getNombreLits() + " lits"));
         center.add(infosPanel);
         center.add(Box.createVerticalStrut(20));
 
-        // --- Détails sélection utilisateur ---
+        if (hebergement.getComplementDescription() != null && !hebergement.getComplementDescription().isEmpty()) {
+            JPanel descriptionPanel = createRoundedPanel();
+            descriptionPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            JLabel desc = new JLabel("<html><p style='width:600px'>" + hebergement.getComplementDescription() + "</p></html>");
+            desc.setFont(new Font("Arial", Font.ITALIC, 14));
+            descriptionPanel.add(desc);
+            center.add(descriptionPanel);
+            center.add(Box.createVerticalStrut(20));
+        }
+
         JPanel recap = createRoundedPanel();
         recap.setMaximumSize(new Dimension(500, 120));
+        recap.setAlignmentX(Component.CENTER_ALIGNMENT);
         recap.add(new JLabel("📋 Vos données sélectionnées"));
         recap.add(new JLabel("🗓️ Séjour : " + dateArrivee + " → " + dateDepart));
         recap.add(new JLabel("👨‍👩‍👧‍👦 Voyageurs : " + (nbParents + nbEnfants) + " pers (" + nbParents + " parents, " + nbEnfants + " enfants)"));
@@ -138,16 +143,15 @@ public class FicheHebergement extends JFrame {
         center.add(recap);
         center.add(Box.createVerticalStrut(20));
 
-        // --- Prix total ---
         long nbJours = ChronoUnit.DAYS.between(dateArrivee, dateDepart);
         double total = nbJours * hebergement.getPrix();
         JPanel paiementPanel = createRoundedPanel();
         paiementPanel.setMaximumSize(new Dimension(500, 80));
+        paiementPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
         paiementPanel.add(new JLabel("Prix total pour " + nbJours + " nuit(s) : " + total + " €"));
         center.add(paiementPanel);
         center.add(Box.createVerticalStrut(30));
 
-        // --- Bouton Payer ---
         JButton btnValider = new JButton("Payer et confirmer");
         btnValider.setBackground(Color.decode("#598d90"));
         btnValider.setForeground(Color.WHITE);
@@ -158,7 +162,14 @@ public class FicheHebergement extends JFrame {
         btnValider.addActionListener(e -> doReservationAndPayment(total));
         center.add(btnValider);
 
-        add(center, BorderLayout.CENTER);
+        JPanel centerWrapper = new JPanel();
+        centerWrapper.setLayout(new BoxLayout(centerWrapper, BoxLayout.X_AXIS));
+        centerWrapper.setBackground(Color.WHITE);
+        centerWrapper.add(Box.createHorizontalGlue());
+        centerWrapper.add(center);
+        centerWrapper.add(Box.createHorizontalGlue());
+
+        add(centerWrapper, BorderLayout.CENTER);
     }
 
     private void doReservationAndPayment(double montant) {

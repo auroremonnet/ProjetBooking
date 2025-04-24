@@ -17,7 +17,8 @@ public class AdminGererProprieteView extends JFrame {
 
     // Champs du formulaire
     private JTextField nomField, adresseField, localisationField, prixField,
-            categorieField, photoField, optionsField, capaciteField, litsField, idSuppressionField;
+            categorieField, photoField, optionsField, capaciteField, litsField, idSuppressionField,
+            complementField;
 
     public AdminGererProprieteView(Connection conn) {
         this.connection = conn;
@@ -58,7 +59,6 @@ public class AdminGererProprieteView extends JFrame {
     }
 
     private void chargerHebergements() {
-        // retire l'ancien scroll si besoin
         if (scrollPane != null) {
             remove(scrollPane);
         }
@@ -85,24 +85,24 @@ public class AdminGererProprieteView extends JFrame {
                 ligne.setPreferredSize(new Dimension(950, 100));
                 ligne.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-                // image
                 String imagePath = "resources/images/" + h.getPhotos();
                 ImageIcon icon = new ImageIcon(imagePath);
                 Image scaled = icon.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
                 JLabel imageLabel = new JLabel(new ImageIcon(scaled));
 
-                // texte d’info
                 String info = String.format(
                         "<html><b>ID:</b> %d  |  <b>%s</b>  |  %s  —  %.2f €<br>"
-                                + "Catégorie: %s  |  Options: %s  |  Capacité: %d  |  Lits: %d</html>",
+                                + "Catégorie: %s  |  Options: %s  |  Capacité: %d  |  Lits: %d<br>"
+                                + "<i>%s</i></html>",
                         h.getIdHebergement(),
                         h.getNom(),
                         h.getAdresse(),
                         h.getPrix(),
-                        h.getCategorie(),      // appelle bien getCategorie()
+                        h.getCategorie(),
                         h.getOptions(),
                         h.getCapaciteMax(),
-                        h.getNombreLits()
+                        h.getNombreLits(),
+                        h.getComplementDescription() != null ? h.getComplementDescription() : ""
                 );
                 JLabel label = new JLabel(info);
                 label.setPreferredSize(new Dimension(800, 80));
@@ -132,7 +132,6 @@ public class AdminGererProprieteView extends JFrame {
         formPanel.setBackground(new Color(89, 141, 144));
         formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // === Champs ===
         JPanel fieldsPanel = new JPanel(new GridLayout(6, 4, 5, 5));
         fieldsPanel.setOpaque(false);
 
@@ -146,6 +145,7 @@ public class AdminGererProprieteView extends JFrame {
         capaciteField = new JTextField();
         litsField = new JTextField();
         idSuppressionField = new JTextField();
+        complementField = new JTextField();
 
         fieldsPanel.add(createLabel("Nom"));
         fieldsPanel.add(nomField);
@@ -165,12 +165,13 @@ public class AdminGererProprieteView extends JFrame {
         fieldsPanel.add(capaciteField);
         fieldsPanel.add(createLabel("Nombre de lits"));
         fieldsPanel.add(litsField);
+        fieldsPanel.add(createLabel("Description complémentaire"));
+        fieldsPanel.add(complementField);
         fieldsPanel.add(createLabel("ID à supprimer"));
         fieldsPanel.add(idSuppressionField);
 
         formPanel.add(fieldsPanel, BorderLayout.CENTER);
 
-        // === Boutons ===
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
         buttonPanel.setOpaque(false);
 
@@ -237,10 +238,11 @@ public class AdminGererProprieteView extends JFrame {
             String options      = optionsField.getText();
             int capaciteMax     = Integer.parseInt(capaciteField.getText());
             int nombreLits      = Integer.parseInt(litsField.getText());
+            String complement   = complementField.getText();
 
             Hebergement h = new Hebergement(
                     nom, adresse, localisation,
-                    "Description automatique",
+                    "Description automatique", complement,
                     prix, categorie, photo, options,
                     capaciteMax, nombreLits
             );
