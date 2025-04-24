@@ -13,7 +13,6 @@ public class ReservationDAO {
         this.connection = connection;
     }
 
-
     public boolean createReservation(Reservation r) throws Exception {
         String sql = "INSERT INTO Reservation (dateArrivee, dateDepart, nombreAdultes, nombreEnfants, nombreChambres, idClient, idHebergement, statut) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -88,8 +87,6 @@ public class ReservationDAO {
         return liste;
     }
 
-
-
     public Reservation findById(int idReservation) throws Exception {
         String sql = "SELECT * FROM Reservation WHERE idReservation = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -114,4 +111,19 @@ public class ReservationDAO {
         return null;
     }
 
+    /**
+     * Récupère l'ID client associé à une réservation donnée.
+     */
+    public int getClientIdFromReservation(int idReservation) throws Exception {
+        String sql = "SELECT idClient FROM Reservation WHERE idReservation = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, idReservation);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("idClient");
+                }
+            }
+        }
+        throw new Exception("Client introuvable pour la réservation ID: " + idReservation);
+    }
 }

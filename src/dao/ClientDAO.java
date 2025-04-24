@@ -103,4 +103,27 @@ public class ClientDAO {
             return stmt.executeUpdate() > 0;
         }
     }
+
+    // 🔍 Recherche d’un client par son ID
+    public Client findById(int idClient) throws SQLException {
+        String sql = "SELECT * FROM Client WHERE idClient = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, idClient);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new Client(
+                            rs.getInt("idClient"),
+                            rs.getString("nom"),
+                            rs.getString("prenom"),
+                            rs.getString("email"),
+                            rs.getString("motDePasse"),
+                            rs.getString("typeClient"),
+                            rs.getString("adresse"),
+                            rs.getString("telephone")
+                    );
+                }
+            }
+        }
+        return null;
+    }
 }

@@ -3,19 +3,21 @@ package view;
 import controller.BookingController;
 import dao.MoyenPaiementDAO;
 import dao.PaiementDAO;
+import dao.ReductionClientDAO;
 import model.Client;
 import model.MoyenPaiement;
 import model.Paiement;
 import model.Hebergement;
-import java.time.LocalDate;
+import model.ReductionClient;
 
+import java.time.LocalDate;
+import java.util.Optional;
 
 import javax.swing.*;
 import java.awt.*;
 import java.sql.Connection;
 import java.sql.Timestamp;
 import java.time.Instant;
-
 
 /**
  * Fenêtre de paiement CB (4 chiffres, MM/AA, CVV), avec design harmonisé.
@@ -32,7 +34,6 @@ public class PaiementView extends JFrame {
     private final int nbParents;
     private final int nbEnfants;
     private final int nbLits;
-
 
     private JTextField tfNum, tfExp, tfCvv;
 
@@ -72,7 +73,6 @@ public class PaiementView extends JFrame {
         setVisible(true);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
-
 
     private void buildHeader() {
         JPanel header = new JPanel(new BorderLayout());
@@ -114,9 +114,29 @@ public class PaiementView extends JFrame {
         main.setBorder(BorderFactory.createEmptyBorder(30, 80, 30, 80));
         main.setBackground(Color.WHITE);
 
-        JLabel lblMontant = new JLabel("À payer : " + montant + " €");
+        // Récupérer le taux de réduction
+        double tauxReduction = 5.0;
+        try {
+            ReductionClientDAO redDao = new ReductionClientDAO(conn);
+            Optional<ReductionClient> opt = redDao.findByType(client.getTypeClient());
+            tauxReduction = opt.map(ReductionClient::getTauxReduction).orElse(5.0);
+        } catch (Exception e) {
+            System.err.println("Erreur chargement réduction : " + e.getMessage());
+        }
+
+        double montantRemise = montant * tauxReduction / 100.0;
+        double montantFinal = montant - montantRemise;
+
+        JLabel lblReduction = new JLabel("Réduction " + client.getTypeClient() + " : -" + tauxReduction + "%");
+        lblReduction.setFont(new Font("Arial", Font.PLAIN, 16));
+        lblReduction.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel lblMontant = new JLabel("À payer après réduction : " + String.format("%.2f", montantFinal) + " €");
         lblMontant.setFont(new Font("Arial", Font.BOLD, 18));
         lblMontant.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        main.add(lblReduction);
+        main.add(Box.createVerticalStrut(10));
         main.add(lblMontant);
         main.add(Box.createVerticalStrut(25));
 
@@ -140,7 +160,7 @@ public class PaiementView extends JFrame {
         btnPayer.setAlignmentX(Component.CENTER_ALIGNMENT);
         btnPayer.addActionListener(e -> doPayment());
         main.add(btnPayer);
-        main.add(Box.createVerticalStrut(15)); // espace entre les deux boutons
+        main.add(Box.createVerticalStrut(15));
 
         JButton btnRetour = new JButton("Retour");
         btnRetour.setBackground(Color.decode("#7ac2c7"));
@@ -156,9 +176,6 @@ public class PaiementView extends JFrame {
         });
 
         main.add(btnRetour);
-
-
-
         add(main, BorderLayout.CENTER);
     }
 

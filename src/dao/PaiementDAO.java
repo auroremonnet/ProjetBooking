@@ -2,21 +2,53 @@
 package dao;
 
 import model.Paiement;
+import model.Client;
+import model.ReductionClient;
+
 import java.sql.*;
+import java.util.Optional;
 
 /**
- * DAO pour valider (CVV + solde) puis insérer le paiement dans Paiement.
+ * DAO pour valider (CVV + solde), appliquer la réduction, puis insérer le paiement.
  */
 public class PaiementDAO {
     private final Connection conn;
-    public PaiementDAO(Connection conn) { this.conn = conn; }
+
+    public PaiementDAO(Connection conn) {
+        this.conn = conn;
+    }
 
     public boolean enregistrerPaiement(Paiement pmt) throws SQLException {
         MoyenPaiementDAO mdao = new MoyenPaiementDAO(conn);
+        ClientDAO clientDAO = new ClientDAO(conn);
+        ReservationDAO reservationDAO = new ReservationDAO(conn);
+        ReductionClientDAO reductionDAO = new ReductionClientDAO(conn);
+
         try {
             conn.setAutoCommit(false);
 
             Integer idMoyen = pmt.getIdMoyenPaiement();
+
+            int idClient;
+            try {
+                idClient = reservationDAO.getClientIdFromReservation(pmt.getIdReservation());
+            } catch (Exception e) {
+                e.printStackTrace();
+                conn.rollback();
+                return false;
+            }
+
+            Client client = clientDAO.findById(idClient);
+            String typeClient = client.getTypeClient();
+            ReductionClient reduction = reductionDAO.findByType(typeClient).orElse(null);
+
+            double tauxReduction = (reduction != null) ? reduction.getTauxReduction() : 5.0;
+            double montantInitial = pmt.getMontant();
+            double montantReduit = montantInitial * (1 - tauxReduction / 100.0);
+
+            // Appliquer la réduction au paiement
+            pmt.setMontant(montantReduit);
+            pmt.setTauxReduction(tauxReduction);
 
             // 1) Validation CVV
             if (idMoyen != null && !mdao.validerCvv(idMoyen, pmt.getCvv())) {
@@ -28,11 +60,11 @@ public class PaiementDAO {
                 conn.rollback();
                 return false;
             }
-            // 3) Insertion du paiement
+            // 3) Insertion du paiement avec taux de réduction
             String sql = """
                 INSERT INTO Paiement
-                  (idReservation, montant, modePaiement, datePaiement, idMoyenPaiement, cvv)
-                VALUES (?, ?, ?, ?, ?, ?)
+                  (idReservation, montant, modePaiement, datePaiement, idMoyenPaiement, cvv, taux_reduction)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 """;
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, pmt.getIdReservation());
@@ -46,6 +78,7 @@ public class PaiementDAO {
                     ps.setNull(5, Types.INTEGER);
                     ps.setNull(6, Types.VARCHAR);
                 }
+                ps.setDouble(7, tauxReduction);
                 ps.executeUpdate();
             }
             conn.commit();
