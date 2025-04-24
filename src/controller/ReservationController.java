@@ -12,11 +12,15 @@ public class ReservationController {
 
     public ReservationController(Connection conn) {
         this.reservationDAO = new ReservationDAO(conn);
-        this.conn = conn;  // Ajouté pour pouvoir faire des requêtes directes
+        this.conn = conn;  // Pour les accès directs
     }
 
     public boolean reserver(Reservation reservation) throws Exception {
-        return reservationDAO.createReservation(reservation);
+        boolean ok = reservationDAO.createReservation(reservation);
+        if (ok) {
+            updateClientToAncien(reservation.getIdClient());
+        }
+        return ok;
     }
 
     public List<Reservation> historiqueParClient(int idClient) throws Exception {
@@ -31,7 +35,6 @@ public class ReservationController {
         return reservationDAO.getReservationsDerniers3Mois(idClient);
     }
 
-    // ✅ MÉTHODE À AJOUTER : vérifie si un client a réservé un hébergement
     public boolean aReserveHebergement(int idClient, int idHebergement) {
         String sql = "SELECT COUNT(*) FROM reservation WHERE idClient = ? AND idHebergement = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -46,5 +49,16 @@ public class ReservationController {
             e.printStackTrace();
         }
         return false;
+    }
+
+    // ✅ Mise à jour automatique du type client
+    private void updateClientToAncien(int idClient) {
+        String sql = "UPDATE Client SET typeClient = 'ancien' WHERE idClient = ? AND typeClient = 'nouveau'";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idClient);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace(); // Logiquement, on ne bloque pas la réservation même si cette mise à jour échoue
+        }
     }
 }
