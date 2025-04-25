@@ -182,35 +182,62 @@ public class MainView extends JFrame {
         setVisible(true);
     }
 
+    // extrait modifié pour MainView - méthode rechercher adaptée
     private void rechercher() {
         logementPanel.removeAll();
         try {
             String lieu = champLieu.getText().trim();
-            String cate = getSelected(cbCategories);
-            List<String> opts = new ArrayList<>();
-            opts.addAll(getListSelected(cbCaracteristiques));
-            opts.addAll(getListSelected(cbProfitances));
-            opts.addAll(getListSelected(cbLocalisations));
+            Date d1 = (Date) dateArriveePicker.getModel().getValue();
+            Date d2 = (Date) dateDepartPicker.getModel().getValue();
 
-            int voyageurs = (Integer) spinnerParents.getValue() + (Integer) spinnerEnfants.getValue();
-            int lits       = (Integer) spinnerLits.getValue();
+            // Si les dates sont remplies, rechercher uniquement par disponibilités
+            if (d1 != null && d2 != null) {
+                List<Hebergement> disponibles = controller.rechercher(
+                        lieu,
+                        d1,
+                        d2,
+                        (Integer) spinnerParents.getValue(),
+                        (Integer) spinnerEnfants.getValue(),
+                        (Integer) spinnerLits.getValue()
+                );
+                if (disponibles.isEmpty()) {
+                    logementPanel.add(new JLabel("Aucun hébergement disponible pour les dates sélectionnées."));
+                } else {
+                    for (Hebergement h : disponibles) {
+                        logementPanel.add(creerCarte(h));
+                        logementPanel.add(Box.createVerticalStrut(15));
+                    }
+                }
+            } else {
+                // Sinon, faire une recherche avancée classique
+                String cate = getSelected(cbCategories);
+                List<String> opts = new ArrayList<>();
+                opts.addAll(getListSelected(cbCaracteristiques));
+                opts.addAll(getListSelected(cbProfitances));
+                opts.addAll(getListSelected(cbLocalisations));
 
-            List<Hebergement> result = controller.rechercherAvancee(lieu, cate, String.join(",", opts));
-            for (Hebergement h : result) {
-                if (h.getCapaciteMax() >= voyageurs && h.getNombreLits() >= lits) {
-                    logementPanel.add(creerCarte(h));
-                    logementPanel.add(Box.createVerticalStrut(15));
+                int voyageurs = (Integer) spinnerParents.getValue() + (Integer) spinnerEnfants.getValue();
+                int lits = (Integer) spinnerLits.getValue();
+
+                List<Hebergement> result = controller.rechercherAvancee(lieu, cate, String.join(",", opts));
+                for (Hebergement h : result) {
+                    if (h.getCapaciteMax() >= voyageurs && h.getNombreLits() >= lits) {
+                        logementPanel.add(creerCarte(h));
+                        logementPanel.add(Box.createVerticalStrut(15));
+                    }
+                }
+                if (logementPanel.getComponentCount() == 0) {
+                    logementPanel.add(new JLabel("Aucun hébergement trouvé."));
                 }
             }
-            if (logementPanel.getComponentCount() == 0) {
-                logementPanel.add(new JLabel("Aucun hébergement trouvé."));
-            }
         } catch (Exception ex) {
-            logementPanel.add(new JLabel("Erreur : " + ex.getMessage()));
+            ex.printStackTrace();
+            logementPanel.add(new JLabel("Erreur lors de la recherche : " + ex.getMessage()));
         }
         logementPanel.revalidate();
         logementPanel.repaint();
     }
+
 
     private void afficherTous() {
         logementPanel.removeAll();
