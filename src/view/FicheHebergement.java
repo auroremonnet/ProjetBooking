@@ -62,11 +62,16 @@ public class FicheHebergement extends JFrame {
     private void buildHeader() {
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(Color.decode("#7ac2c7"));
-        header.setPreferredSize(new Dimension(800, 60));
+        header.setPreferredSize(new Dimension(700, 60));
 
-        JLabel titre = new JLabel("Réservation", SwingConstants.CENTER);
-        titre.setFont(new Font("Arial", Font.BOLD, 22));
+
+        header.setBackground(new Color(122, 194, 199));
+        header.setPreferredSize(new Dimension(0, 70));
+        JLabel titre = new JLabel("Votre Réservation En Cours", SwingConstants.CENTER);
+        titre.setFont(new Font("Arial", Font.BOLD, 34));
+        titre.setForeground(Color.WHITE);
         header.add(titre, BorderLayout.CENTER);
+        add(header, BorderLayout.NORTH);
 
         // Création du menu popup
         JPopupMenu menu = new JPopupMenu();
@@ -142,15 +147,26 @@ public class FicheHebergement extends JFrame {
         center.add(Box.createVerticalStrut(20));
 
         // Description complémentaire
+        // Description complémentaire (centrée)
         if (hebergement.getComplementDescription() != null && !hebergement.getComplementDescription().isEmpty()) {
             JPanel descPanel = createRoundedPanel();
             descPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-            JLabel desc = new JLabel("<html><p style='width:600px'>" + hebergement.getComplementDescription() + "</p></html>");
+
+            // Label centré horizontalement
+            JLabel desc = new JLabel(
+                    "<html><div style='width:600px; text-align:center;'>" +
+                            hebergement.getComplementDescription() +
+                            "</div></html>"
+            );
             desc.setFont(new Font("Arial", Font.ITALIC, 14));
+            desc.setAlignmentX(Component.CENTER_ALIGNMENT);
+            desc.setHorizontalAlignment(SwingConstants.CENTER);
+
             descPanel.add(desc);
             center.add(descPanel);
             center.add(Box.createVerticalStrut(20));
         }
+
 
         // Récapitulatif de la sélection
         JPanel recap = createRoundedPanel();
@@ -164,14 +180,39 @@ public class FicheHebergement extends JFrame {
         center.add(Box.createVerticalStrut(20));
 
         // Calcul du prix total
+        // Calcul du prix total et affichage dans un rectangle vert/bleu
         long nbJours = ChronoUnit.DAYS.between(dateArrivee, dateDepart);
         double total = nbJours * hebergement.getPrix();
-        JPanel paiementPanel = createRoundedPanel();
-        paiementPanel.setMaximumSize(new Dimension(500, 80));
+
+// Panel custom pour la couleur #598d90
+        JPanel paiementPanel = new JPanel() {
+            @Override protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setRenderingHint(
+                        RenderingHints.KEY_ANTIALIASING,
+                        RenderingHints.VALUE_ANTIALIAS_ON
+                );
+                g2.setColor(Color.decode("#598d90"));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
+            }
+        };
+        paiementPanel.setOpaque(false);
+        paiementPanel.setLayout(new BoxLayout(paiementPanel, BoxLayout.Y_AXIS));
+        paiementPanel.setMaximumSize(new Dimension(500, 100));
         paiementPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        paiementPanel.add(new JLabel("Prix total pour " + nbJours + " nuit(s) : " + total + " €"));
+
+// Label du total, en grand et en blanc
+        JLabel totalLabel = new JLabel("Prix total pour " + nbJours + " nuit(s) : " + total + " €");
+        totalLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        totalLabel.setForeground(Color.WHITE);
+        totalLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        totalLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+
+        paiementPanel.add(totalLabel);
         center.add(paiementPanel);
         center.add(Box.createVerticalStrut(30));
+
 
         // Bouton de confirmation
         JButton btnValider = new JButton("Payer et confirmer");
