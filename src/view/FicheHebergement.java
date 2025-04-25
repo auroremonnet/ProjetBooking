@@ -79,7 +79,7 @@ public class FicheHebergement extends JFrame {
 
         itemMonCompte.addActionListener(e -> new MonCompteView(client, connection, controller));
 
-        JButton btnMenu = new JButton(" Menu");
+        JButton btnMenu = new JButton("☰ Menu");
         btnMenu.setFocusPainted(false);
         btnMenu.setContentAreaFilled(false);
         btnMenu.setFont(new Font("Arial", Font.PLAIN, 14));
