@@ -1,4 +1,3 @@
-// il faut lancer le site ici //
 import controller.AuthController;
 import model.Client;
 import util.DBConnection;
