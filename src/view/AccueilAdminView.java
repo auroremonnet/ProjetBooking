@@ -142,7 +142,22 @@ public class AccueilAdminView extends JFrame {
             new AuthView(new AuthController(connection), connection);
         }));
 
-        add(panel, BorderLayout.CENTER);
+        // On emballe le centre dans un JScrollPane
+        JScrollPane scrollCenter = new JScrollPane(
+                panel,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        );
+
+// Pour un défilement plus fluide à la molette
+        scrollCenter.getVerticalScrollBar().setUnitIncrement(16);
+
+// (Optionnel) Supprimez la bordure si vous voulez que ça colle aux bords
+        scrollCenter.setBorder(null);
+
+// Et on ajoute ce JScrollPane à la fenêtre
+        add(scrollCenter, BorderLayout.CENTER);
+
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setVisible(true);
     }

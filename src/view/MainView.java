@@ -70,7 +70,7 @@ public class MainView extends JFrame {
         itemMonCompte.addActionListener(e -> new MonCompteView(client, connection, controller));
         menu.add(itemAccueil);
         menu.add(itemMonCompte);
-        JButton menuButton = new JButton("☰ Menu");
+        JButton menuButton = new JButton(" Menu");
         menuButton.setFocusPainted(false);
         menuButton.setContentAreaFilled(false);
         menuButton.setFont(new Font("Arial", Font.PLAIN, 14));

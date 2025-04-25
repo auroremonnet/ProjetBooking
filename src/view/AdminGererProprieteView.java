@@ -42,7 +42,7 @@ public class AdminGererProprieteView extends JFrame {
             }
         };
         header.setPreferredSize(new Dimension(1000, 70));
-        JLabel titre = new JLabel("➕➖ Ajouter / Supprimer des Propriétés", SwingConstants.CENTER);
+        JLabel titre = new JLabel(" Ajouter / Supprimer des Propriétés", SwingConstants.CENTER);
         titre.setFont(new Font("Arial", Font.BOLD, 30));
         titre.setForeground(Color.WHITE);
         header.add(titre, BorderLayout.CENTER);
