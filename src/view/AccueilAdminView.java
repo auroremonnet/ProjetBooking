@@ -13,21 +13,19 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 public class AccueilAdminView extends JFrame {
-    private final Connection     connection;
+    private final Connection connection;
     private final Administrateur admin;
 
     public AccueilAdminView(Administrateur admin, Connection connection) {
         this.connection = connection;
-        this.admin      = admin;
+        this.admin = admin;
 
-        // --- FENÊTRE PRINCIPALE ---
         setTitle("Accueil Administrateur");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(900, 700);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // --- HEADER ---
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(new Color(122, 194, 199));
         header.setPreferredSize(new Dimension(0, 70));
@@ -37,13 +35,12 @@ public class AccueilAdminView extends JFrame {
         header.add(titre, BorderLayout.CENTER);
         add(header, BorderLayout.NORTH);
 
-        // --- BODY PANEL ---
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
 
-        // === RÉCUPÉRATION DU NOM DE FICHIER PHOTO EN BDD ===
+        // Chargement photo admin
         String filename = null;
         try {
             PreparedStatement ps = connection.prepareStatement(
@@ -60,7 +57,6 @@ public class AccueilAdminView extends JFrame {
             ex.printStackTrace();
         }
 
-        // === PROFIL BOX ===
         JPanel profilBox = new JPanel() {
             @Override protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -75,23 +71,20 @@ public class AccueilAdminView extends JFrame {
         profilBox.setMaximumSize(new Dimension(300, 200));
         profilBox.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // --- CHARGEMENT DE L’IMAGE ---
         JLabel photoLabel;
         if (filename != null) {
-            // tentative classpath
             String resourcePath = "images/" + filename;
-            URL    url          = getClass().getClassLoader().getResource(resourcePath);
+            URL url = getClass().getClassLoader().getResource(resourcePath);
 
             if (url != null) {
                 ImageIcon icon = new ImageIcon(url);
-                Image     img  = icon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+                Image img = icon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
                 photoLabel = new JLabel(new ImageIcon(img));
             } else {
-                // fallback fichier brut
                 File f = new File("resources/images/" + filename);
                 if (f.exists()) {
                     ImageIcon icon = new ImageIcon(f.getAbsolutePath());
-                    Image     img  = icon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+                    Image img = icon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
                     photoLabel = new JLabel(new ImageIcon(img));
                 } else {
                     System.err.println("❌ Photo introuvable : " + filename);
@@ -104,7 +97,6 @@ public class AccueilAdminView extends JFrame {
         photoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         profilBox.add(photoLabel);
 
-        // --- NOM / PRÉNOM ---
         JLabel nomPrenom = new JLabel(admin.getPrenom() + " " + admin.getNom(), SwingConstants.CENTER);
         nomPrenom.setFont(new Font("Arial", Font.BOLD, 20));
         nomPrenom.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -114,7 +106,6 @@ public class AccueilAdminView extends JFrame {
         panel.add(profilBox);
         panel.add(Box.createVerticalStrut(20));
 
-        // --- INFO PANEL (EMAIL / MOT DE PASSE) ---
         JPanel infoPanel = new JPanel(new GridLayout(2, 1)) {
             @Override protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -132,7 +123,7 @@ public class AccueilAdminView extends JFrame {
         panel.add(infoPanel);
         panel.add(Box.createVerticalStrut(30));
 
-        // --- BOUTONS ---
+        // Boutons
         panel.add(createRoundedButton("Statistiques", e -> new ReportingView(admin, connection)));
         panel.add(Box.createVerticalStrut(15));
         panel.add(createRoundedButton("Ajouter / Supprimer des propriétés", e -> new AdminGererProprieteView(connection)));
@@ -140,7 +131,8 @@ public class AccueilAdminView extends JFrame {
         panel.add(createRoundedButton("Gérer la clientèle", e -> new AdminGererClientView(connection)));
         panel.add(Box.createVerticalStrut(15));
         panel.add(createRoundedButton("Ajouter des réductions", e -> {
-            //new AdminController(connection).openReductionView();
+            AdminController adminController = new AdminController(connection);
+            new AdminGererReductionView(adminController).setVisible(true);
         }));
         panel.add(Box.createVerticalStrut(30));
         panel.add(createRoundedButton("Envoyer un mail", e -> new AdminGererMailView(admin, connection)));
