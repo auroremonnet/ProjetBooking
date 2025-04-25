@@ -8,6 +8,8 @@ import model.Reservation;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -46,17 +48,15 @@ public class FicheHebergement extends JFrame {
         this.nbLits = nbLits;
         this.controller = controller;
 
-        setTitle("🛏️ Réservation – " + h.getNom());
-        setSize(800, 600);
-        setLocationRelativeTo(null);
+        setTitle("🛏 Réservation – " + h.getNom());
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         buildHeader();
-        buildContent();
+        buildContentWithScroll();
 
         setVisible(true);
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
 
     private void buildHeader() {
@@ -68,18 +68,24 @@ public class FicheHebergement extends JFrame {
         titre.setFont(new Font("Arial", Font.BOLD, 22));
         header.add(titre, BorderLayout.CENTER);
 
+        // Création du menu popup
         JPopupMenu menu = new JPopupMenu();
         JMenuItem itemAccueil = new JMenuItem("🏠 Accueil");
         JMenuItem itemMonCompte = new JMenuItem("👤 Mon compte");
 
+        // Actions du menu
         itemAccueil.addActionListener(e -> {
             dispose();
             new MainView(controller, client, connection);
         });
-
         itemMonCompte.addActionListener(e -> new MonCompteView(client, connection, controller));
 
-        JButton btnMenu = new JButton("☰ Menu");
+        // Ajout des items au menu
+        menu.add(itemAccueil);
+        menu.add(itemMonCompte);
+
+        // Bouton pour afficher le menu
+        JButton btnMenu = new JButton(" Menu");
         btnMenu.setFocusPainted(false);
         btnMenu.setContentAreaFilled(false);
         btnMenu.setFont(new Font("Arial", Font.PLAIN, 14));
@@ -89,32 +95,44 @@ public class FicheHebergement extends JFrame {
         add(header, BorderLayout.NORTH);
     }
 
-    private void buildContent() {
+    private void buildContentWithScroll() {
         JPanel center = new JPanel();
         center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
         center.setBorder(BorderFactory.createEmptyBorder(20, 80, 20, 80));
         center.setBackground(Color.WHITE);
         center.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+        // Chargement de l'image
         JLabel imgLabel = new JLabel();
         imgLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        try {
-            ImageIcon icon = new ImageIcon("images/" + hebergement.getPhotos());
+        URL url = getClass().getClassLoader().getResource("images/" + hebergement.getPhotos());
+        if (url != null) {
+            ImageIcon icon = new ImageIcon(url);
             Image img = icon.getImage().getScaledInstance(250, 200, Image.SCALE_SMOOTH);
             imgLabel.setIcon(new ImageIcon(img));
-        } catch (Exception ex) {
-            imgLabel.setText("Image indisponible");
-            imgLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        } else {
+            File f = new File("resources/images/" + hebergement.getPhotos());
+            if (f.exists()) {
+                ImageIcon icon = new ImageIcon(f.getAbsolutePath());
+                Image img = icon.getImage().getScaledInstance(250, 200, Image.SCALE_SMOOTH);
+                imgLabel.setIcon(new ImageIcon(img));
+            } else {
+                imgLabel.setText("Image indisponible");
+                imgLabel.setHorizontalAlignment(SwingConstants.CENTER);
+                System.err.println("❌ Image introuvable pour : " + hebergement.getPhotos());
+            }
         }
         center.add(imgLabel);
         center.add(Box.createVerticalStrut(15));
 
+        // Nom du logement
         JLabel nom = new JLabel(hebergement.getNom());
         nom.setFont(new Font("Arial", Font.BOLD, 20));
         nom.setAlignmentX(Component.CENTER_ALIGNMENT);
         center.add(nom);
         center.add(Box.createVerticalStrut(10));
 
+        // Panneau d'informations
         JPanel infosPanel = createRoundedPanel();
         infosPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
         infosPanel.add(new JLabel("📍 Adresse : " + hebergement.getAdresse()));
@@ -123,26 +141,29 @@ public class FicheHebergement extends JFrame {
         center.add(infosPanel);
         center.add(Box.createVerticalStrut(20));
 
+        // Description complémentaire
         if (hebergement.getComplementDescription() != null && !hebergement.getComplementDescription().isEmpty()) {
-            JPanel descriptionPanel = createRoundedPanel();
-            descriptionPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            JPanel descPanel = createRoundedPanel();
+            descPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
             JLabel desc = new JLabel("<html><p style='width:600px'>" + hebergement.getComplementDescription() + "</p></html>");
             desc.setFont(new Font("Arial", Font.ITALIC, 14));
-            descriptionPanel.add(desc);
-            center.add(descriptionPanel);
+            descPanel.add(desc);
+            center.add(descPanel);
             center.add(Box.createVerticalStrut(20));
         }
 
+        // Récapitulatif de la sélection
         JPanel recap = createRoundedPanel();
         recap.setMaximumSize(new Dimension(500, 120));
         recap.setAlignmentX(Component.CENTER_ALIGNMENT);
         recap.add(new JLabel("📋 Vos données sélectionnées"));
-        recap.add(new JLabel("🗓️ Séjour : " + dateArrivee + " → " + dateDepart));
+        recap.add(new JLabel("🗓 Séjour : " + dateArrivee + " → " + dateDepart));
         recap.add(new JLabel("👨‍👩‍👧‍👦 Voyageurs : " + (nbParents + nbEnfants) + " pers (" + nbParents + " parents, " + nbEnfants + " enfants)"));
-        recap.add(new JLabel("↪️ Lits souhaités : " + nbLits));
+        recap.add(new JLabel("↪ Lits souhaités : " + nbLits));
         center.add(recap);
         center.add(Box.createVerticalStrut(20));
 
+        // Calcul du prix total
         long nbJours = ChronoUnit.DAYS.between(dateArrivee, dateDepart);
         double total = nbJours * hebergement.getPrix();
         JPanel paiementPanel = createRoundedPanel();
@@ -152,6 +173,7 @@ public class FicheHebergement extends JFrame {
         center.add(paiementPanel);
         center.add(Box.createVerticalStrut(30));
 
+        // Bouton de confirmation
         JButton btnValider = new JButton("Payer et confirmer");
         btnValider.setBackground(Color.decode("#598d90"));
         btnValider.setForeground(Color.WHITE);
@@ -162,6 +184,7 @@ public class FicheHebergement extends JFrame {
         btnValider.addActionListener(e -> doReservationAndPayment(total));
         center.add(btnValider);
 
+        // Wrapping horizontal + JScrollPane
         JPanel centerWrapper = new JPanel();
         centerWrapper.setLayout(new BoxLayout(centerWrapper, BoxLayout.X_AXIS));
         centerWrapper.setBackground(Color.WHITE);
@@ -169,7 +192,11 @@ public class FicheHebergement extends JFrame {
         centerWrapper.add(center);
         centerWrapper.add(Box.createHorizontalGlue());
 
-        add(centerWrapper, BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(centerWrapper);
+        scrollPane.setBorder(null);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        add(scrollPane, BorderLayout.CENTER);
     }
 
     private void doReservationAndPayment(double montant) {
@@ -187,19 +214,16 @@ public class FicheHebergement extends JFrame {
                     "Confirmée",
                     new Timestamp(System.currentTimeMillis())
             );
-
             boolean ok = rc.reserver(r);
             if (!ok) {
                 JOptionPane.showMessageDialog(this, "❌ Échec de la réservation.", "Erreur", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-
             int idResa = rc.historiqueParClient(client.getIdClient())
                     .stream()
                     .max(Comparator.comparing(Reservation::getDateReservation))
                     .get()
                     .getIdReservation();
-
             dispose();
             new PaiementView(
                     connection,
@@ -223,8 +247,7 @@ public class FicheHebergement extends JFrame {
 
     private JPanel createRoundedPanel() {
         JPanel panel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
+            @Override protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g;
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -237,5 +260,5 @@ public class FicheHebergement extends JFrame {
         panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
         panel.setAlignmentX(Component.CENTER_ALIGNMENT);
         return panel;
-    }
+}
 }
