@@ -99,7 +99,7 @@ public class PaiementView extends JFrame {
         menu.add(itemAccueil);
         menu.add(itemMonCompte);
 
-        JButton btnMenu = new JButton("☰ Menu");
+        JButton btnMenu = new JButton(" Menu");
         btnMenu.setFocusPainted(false);
         btnMenu.setContentAreaFilled(false);
         btnMenu.setFont(new Font("Arial", Font.PLAIN, 14));

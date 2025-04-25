@@ -130,7 +130,7 @@ public class AdminGererClientView extends JFrame {
         ajouterBtn.addActionListener(e -> ajouterClient());
         JButton supprimerBtn = createStyledButton("Supprimer");
         supprimerBtn.addActionListener(e -> supprimerClient());
-        JButton retourBtn = createStyledButton("⬅ Retour");
+        JButton retourBtn = createStyledButton("Retour");
         retourBtn.addActionListener(e -> {
             dispose();
             new AccueilAdminView(null, connection);
