@@ -36,6 +36,8 @@ public class MainView extends JFrame {
     private final JSpinner            spinnerParents     = new JSpinner(new SpinnerNumberModel(2, 0, 20, 1));
     private final JSpinner            spinnerEnfants     = new JSpinner(new SpinnerNumberModel(0, 0, 20, 1));
     private final JSpinner            spinnerLits        = new JSpinner(new SpinnerNumberModel(1, 1, 20, 1));
+    private final JSpinner            spinnerPrixMin     = new JSpinner(new SpinnerNumberModel(0, 0, 10000, 10));
+    private final JSpinner            spinnerPrixMax     = new JSpinner(new SpinnerNumberModel(1000, 0, 10000, 10));
     private final JDatePickerImpl     dateArriveePicker;
     private final JDatePickerImpl     dateDepartPicker;
 
@@ -124,6 +126,18 @@ public class MainView extends JFrame {
         pnlVoy.add(new JLabel("Lits :"));      pnlVoy.add(spinnerLits);
         filtresPanel.add(pnlVoy);
 
+        // Prix
+        JLabel lblPrix = new JLabel("💶 Prix (€) :");
+        lblPrix.setForeground(Color.WHITE);
+        lblPrix.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 0));
+        filtresPanel.add(lblPrix);
+        JPanel pnlPrix = new JPanel(new GridLayout(2,2,5,5));
+        pnlPrix.setOpaque(false);
+        pnlPrix.add(new JLabel("Min :")); pnlPrix.add(spinnerPrixMin);
+        pnlPrix.add(new JLabel("Max :")); pnlPrix.add(spinnerPrixMax);
+        filtresPanel.add(pnlPrix);
+        filtresPanel.add(Box.createVerticalStrut(10));
+
         // Boutons Rechercher / Tout afficher
         JButton btnChercher     = new JButton("🔍 Rechercher");
         JButton btnToutAfficher = new JButton("📋 Tout afficher");
@@ -173,6 +187,8 @@ public class MainView extends JFrame {
             resetCheckboxes(cbProfitances);
             dateArriveePicker.getModel().setValue(null);
             dateDepartPicker.getModel().setValue(null);
+            spinnerPrixMin.setValue(0);
+            spinnerPrixMax.setValue(1000);
             afficherTous();
         });
 
@@ -182,13 +198,14 @@ public class MainView extends JFrame {
         setVisible(true);
     }
 
-    // extrait modifié pour MainView - méthode rechercher adaptée
     private void rechercher() {
         logementPanel.removeAll();
         try {
             String lieu = champLieu.getText().trim();
             Date d1 = (Date) dateArriveePicker.getModel().getValue();
             Date d2 = (Date) dateDepartPicker.getModel().getValue();
+            int prixMin = (Integer) spinnerPrixMin.getValue();
+            int prixMax = (Integer) spinnerPrixMax.getValue();
 
             // Si les dates sont remplies, rechercher uniquement par disponibilités
             if (d1 != null && d2 != null) {
@@ -200,13 +217,14 @@ public class MainView extends JFrame {
                         (Integer) spinnerEnfants.getValue(),
                         (Integer) spinnerLits.getValue()
                 );
-                if (disponibles.isEmpty()) {
-                    logementPanel.add(new JLabel("Aucun hébergement disponible pour les dates sélectionnées."));
-                } else {
-                    for (Hebergement h : disponibles) {
+                for (Hebergement h : disponibles) {
+                    if (h.getPrix() >= prixMin && h.getPrix() <= prixMax) {
                         logementPanel.add(creerCarte(h));
                         logementPanel.add(Box.createVerticalStrut(15));
                     }
+                }
+                if (logementPanel.getComponentCount() == 0) {
+                    logementPanel.add(new JLabel("Aucun hébergement disponible pour les dates sélectionnées et le budget spécifié."));
                 }
             } else {
                 // Sinon, faire une recherche avancée classique
@@ -221,13 +239,14 @@ public class MainView extends JFrame {
 
                 List<Hebergement> result = controller.rechercherAvancee(lieu, cate, String.join(",", opts));
                 for (Hebergement h : result) {
-                    if (h.getCapaciteMax() >= voyageurs && h.getNombreLits() >= lits) {
+                    if (h.getCapaciteMax() >= voyageurs && h.getNombreLits() >= lits
+                            && h.getPrix() >= prixMin && h.getPrix() <= prixMax) {
                         logementPanel.add(creerCarte(h));
                         logementPanel.add(Box.createVerticalStrut(15));
                     }
                 }
                 if (logementPanel.getComponentCount() == 0) {
-                    logementPanel.add(new JLabel("Aucun hébergement trouvé."));
+                    logementPanel.add(new JLabel("Aucun hébergement trouvé pour les critères spécifiés."));
                 }
             }
         } catch (Exception ex) {
@@ -237,7 +256,6 @@ public class MainView extends JFrame {
         logementPanel.revalidate();
         logementPanel.repaint();
     }
-
 
     private void afficherTous() {
         logementPanel.removeAll();
